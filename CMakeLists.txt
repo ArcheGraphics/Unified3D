@@ -38,3 +38,5 @@ set(MLX_METAL_PATH ${CMAKE_CURRENT_BINARY_DIR}/kernels/)
 
 # Add third party libraries
 add_subdirectory(third_party)
+
+add_subdirectory(unified3D)
