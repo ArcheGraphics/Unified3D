@@ -9,15 +9,15 @@
 #include <string>
 #include <vector>
 
-#include "open3d/core/CUDAUtils.h"
-#include "open3d/utility/Helper.h"
-#include "open3d/utility/Logging.h"
+// #include "open3d/core/CUDAUtils.h"
+// #include "open3d/utility/Helper.h"
+// #include "open3d/utility/Logging.h"
 
 namespace unified3d::core {
 
 static Device::DeviceType StringToDeviceType(const std::string &type_colon_id) {
     const std::vector<std::string> tokens =
-        utility::SplitString(type_colon_id, ":", true);
+            utility::SplitString(type_colon_id, ":", true);
     if (tokens.size() == 2) {
         std::string device_type_lower = utility::ToLower(tokens[0]);
         if (device_type_lower == "cpu") {
@@ -26,28 +26,28 @@ static Device::DeviceType StringToDeviceType(const std::string &type_colon_id) {
             return Device::DeviceType::GPU;
         } else {
             utility::LogError(
-                "Invalid device string {}. Valid device strings are like "
-                "\"CPU:0\" or \"GPU:1\"",
-                type_colon_id);
+                    "Invalid device string {}. Valid device strings are like "
+                    "\"CPU:0\" or \"GPU:1\"",
+                    type_colon_id);
         }
     } else {
         utility::LogError(
-            "Invalid device string {}. Valid device strings are like "
-            "\"CPU:0\" or \"GPU:1\"",
-            type_colon_id);
+                "Invalid device string {}. Valid device strings are like "
+                "\"CPU:0\" or \"GPU:1\"",
+                type_colon_id);
     }
 }
 
 static int StringToDeviceId(const std::string &type_colon_id) {
     const std::vector<std::string> tokens =
-        utility::SplitString(type_colon_id, ":", true);
+            utility::SplitString(type_colon_id, ":", true);
     if (tokens.size() == 2) {
         return std::stoi(tokens[1]);
     } else {
         utility::LogError(
-            "Invalid device string {}. Valid device strings are like "
-            "\"CPU:0\" or \"GPU:1\"",
-            type_colon_id);
+                "Invalid device string {}. Valid device strings are like "
+                "\"CPU:0\" or \"GPU:1\"",
+                type_colon_id);
     }
 }
 
@@ -132,5 +132,4 @@ void Device::PrintAvailableDevices() {
     }
 }
 
-}// namespace unified3d::core
-// namespace unified3d::core
+}  // namespace unified3d::core
