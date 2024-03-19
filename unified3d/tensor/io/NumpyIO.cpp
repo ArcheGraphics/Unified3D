@@ -46,13 +46,11 @@
 #include "unified3d/utility/FileSystem.h"
 #include "unified3d/utility/Logging.h"
 
-namespace u3d {
-namespace t {
-namespace io {
+namespace u3d::t::io {
 
 class CharVector {
 public:
-    CharVector() {}
+    CharVector() = default;
     CharVector(size_t size) : buffer_(size) {}
     CharVector(size_t size, const char value) : buffer_(size, value) {}
 
@@ -107,13 +105,13 @@ public:
 
     std::vector<char>::iterator End() { return buffer_.end(); }
 
-    size_t Size() const { return buffer_.size(); }
+    [[nodiscard]] size_t Size() const { return buffer_.size(); }
 
     void Resize(size_t count) { buffer_.resize(count); }
 
     char* Data() { return buffer_.data(); }
 
-    const char* Data() const { return buffer_.data(); }
+    [[nodiscard]] const char* Data() const { return buffer_.data(); }
 
     char& operator[](size_t index) { return buffer_[index]; }
 
@@ -159,7 +157,7 @@ static CharVector CreateNumpyHeader(const core::SizeVector& shape,
     // {1}    -> "(1,)"
     // {1, 2} -> "(1, 2)"
     std::stringstream shape_ss;
-    if (shape.size() == 0) {
+    if (shape.empty()) {
         shape_ss << "()";
     } else if (shape.size() == 1) {
         shape_ss << fmt::format("({},)", shape[0]);
@@ -219,11 +217,11 @@ static std::tuple<core::SizeVector, char, int64_t, bool> ParsePropertyDict(
         utility::LogError("Failed to find header keyword: 'fortran_order'");
     }
     loc1 += 16;
-    fortran_order = (header.substr(loc1, 4) == "True" ? true : false);
+    fortran_order = header.substr(loc1, 4) == "True";
 
     // Shape.
-    loc1 = header.find("(");
-    loc2 = header.find(")");
+    loc1 = header.find('(');
+    loc2 = header.find(')');
     if (loc1 == std::string::npos || loc2 == std::string::npos) {
         utility::LogError("Failed to find header keyword: '(' or ')'");
     }
@@ -247,8 +245,7 @@ static std::tuple<core::SizeVector, char, int64_t, bool> ParsePropertyDict(
     }
 
     loc1 += 9;
-    bool little_endian =
-            (header[loc1] == '<' || header[loc1] == '|' ? true : false);
+    bool little_endian = header[loc1] == '<' || header[loc1] == '|';
     if (!little_endian) {
         utility::LogError("Only big endian is supported.");
     }
@@ -256,7 +253,7 @@ static std::tuple<core::SizeVector, char, int64_t, bool> ParsePropertyDict(
     type = header[loc1 + 1];
 
     std::string str_ws = header.substr(loc1 + 2);
-    loc2 = str_ws.find("'");
+    loc2 = str_ws.find('\'');
     word_size = atoi(str_ws.substr(0, loc2).c_str());
 
     return std::make_tuple(shape, type, word_size, fortran_order);
@@ -360,7 +357,7 @@ static void WriteNpzOneTensor(const std::string& file_name,
                               const std::string& tensor_name,
                               const core::Tensor& tensor,
                               bool append) {
-    const void* data = tensor.GetDataPtr();
+    const void* data = tensor.GetDataPtr()->CpuAddress();
     const core::SizeVector shape = tensor.GetShape();
     const core::Dtype dtype = tensor.GetDtype();
     const int64_t element_byte_size = dtype.ByteSize();
@@ -398,8 +395,8 @@ static void WriteNpzOneTensor(const std::string& file_name,
 
     CharVector npy_header = CreateNumpyHeader(shape, dtype);
 
-    size_t nels = std::accumulate(shape.begin(), shape.end(), 1,
-                                  std::multiplies<size_t>());
+    size_t nels =
+            std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>());
     size_t nbytes = nels * element_byte_size + npy_header.Size();
 
     // Get the CRC of the data to be added.
@@ -514,15 +511,15 @@ public:
 
     template <typename T>
     T* GetDataPtr() {
-        return reinterpret_cast<T*>(blob_->GetDataPtr());
+        return reinterpret_cast<T*>(blob_->GetDataPtr()->CpuAddress());
     }
 
     template <typename T>
-    const T* GetDataPtr() const {
-        return reinterpret_cast<const T*>(blob_->GetDataPtr());
+    [[nodiscard]] const T* GetDataPtr() const {
+        return reinterpret_cast<const T*>(blob_->GetDataPtr()->CpuAddress());
     }
 
-    core::Dtype GetDtype() const {
+    [[nodiscard]] core::Dtype GetDtype() const {
         if (type_ == 'f' && word_size_ == 4) return core::Float32;
         if (type_ == 'f' && word_size_ == 8) return core::Float64;
         if (type_ == 'i' && word_size_ == 1) return core::Int8;
@@ -538,15 +535,17 @@ public:
         return core::Undefined;
     }
 
-    core::SizeVector GetShape() const { return shape_; }
+    [[nodiscard]] core::SizeVector GetShape() const { return shape_; }
 
-    bool IsFortranOrder() const { return fortran_order_; }
+    [[nodiscard]] bool IsFortranOrder() const { return fortran_order_; }
 
-    int64_t NumBytes() const { return NumElements() * word_size_; }
+    [[nodiscard]] int64_t NumBytes() const {
+        return NumElements() * word_size_;
+    }
 
-    int64_t NumElements() const { return shape_.NumElements(); }
+    [[nodiscard]] int64_t NumElements() const { return shape_.NumElements(); }
 
-    core::Tensor ToTensor() const {
+    [[nodiscard]] core::Tensor ToTensor() const {
         if (fortran_order_) {
             utility::LogError("Cannot load Numpy array with fortran_order.");
         }
@@ -559,7 +558,7 @@ public:
         }
         // t.blob_ is the same as blob_, no need for memory copy.
         core::Tensor t(shape_, core::shape_util::DefaultStrides(shape_),
-                       const_cast<void*>(GetDataPtr<void>()), dtype, blob_);
+                       blob_->GetDataPtr(), dtype, blob_);
         return t;
     }
 
@@ -762,9 +761,9 @@ void WriteNpz(const std::string& file_name,
     }
 
     std::unordered_map<std::string, core::Tensor> contiguous_tensor_map;
-    for (auto it = tensor_map.begin(); it != tensor_map.end(); ++it) {
-        contiguous_tensor_map[it->first] =
-                it->second.To(core::Device("CPU:0")).Contiguous();
+    for (const auto& it : tensor_map) {
+        contiguous_tensor_map[it.first] =
+                it.second.To(core::Device("CPU:0")).Contiguous();
     }
 
     // TODO: WriteNpzOneTensor is called multiple times in order to write
@@ -772,17 +771,15 @@ void WriteNpz(const std::string& file_name,
     // times, which is not optimal.
     // TODO: Support writing in compressed mode: np.savez_compressed().
     bool is_first_tensor = true;
-    for (auto it = tensor_map.begin(); it != tensor_map.end(); ++it) {
-        core::Tensor tensor = it->second.To(core::Device("CPU:0")).Contiguous();
+    for (const auto& it : tensor_map) {
+        core::Tensor tensor = it.second.To(core::Device("CPU:0")).Contiguous();
         if (is_first_tensor) {
-            WriteNpzOneTensor(file_name, it->first, tensor, /*append=*/false);
+            WriteNpzOneTensor(file_name, it.first, tensor, /*append=*/false);
             is_first_tensor = false;
         } else {
-            WriteNpzOneTensor(file_name, it->first, tensor, /*append=*/true);
+            WriteNpzOneTensor(file_name, it.first, tensor, /*append=*/true);
         }
     }
 }
 
-}  // namespace io
-}  // namespace t
-}  // namespace u3d
+}  // namespace u3d::t::io

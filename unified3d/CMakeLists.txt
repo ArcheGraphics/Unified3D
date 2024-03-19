@@ -134,11 +134,17 @@ set(DATA_FILES
         data/Dataset.cpp
 )
 
+set(TENSOR_FILES
+        tensor/io/NumpyIO.h
+        tensor/io/NumpyIO.cpp
+)
+
 set(PROJECT_FILES
         ${CORE_FILES}
         ${METAL_FILES}
         ${UTILITY_FILES}
         ${DATA_FILES}
+        ${TENSOR_FILES}
 )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
@@ -164,6 +170,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         openblas
         OpenSSL::SSL OpenSSL::Crypto
         unofficial::minizip::minizip
+        "-framework Metal"
+        "-framework MetalKit"
+        "-framework AppKit"
+        "-framework Foundation"
+        "-framework QuartzCore"
 )
 
 #set(KERNEL_FIELS
