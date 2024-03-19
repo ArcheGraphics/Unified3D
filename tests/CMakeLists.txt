@@ -7,8 +7,29 @@
 # create sample app project
 project(cpp-tests LANGUAGES C CXX)
 
+set(TEST_FILES
+        test_utility/Compare.h
+        test_utility/Compare.cpp
+        test_utility/Rand.h
+        test_utility/Rand.cpp
+        test_utility/Raw.h
+        test_utility/Raw.cpp
+        test_utility/Sort.h
+        test_utility/Sort.cpp
+)
+
+set(CORE_FILES
+        core/CoreTest.h
+        core/CoreTest.cpp
+        core/Tensor.cpp
+)
+
 set(SRC
-        main.cpp
+        ${TEST_FILES}
+        ${CORE_FILES}
+        Tests.h
+        Tests.cpp
+        Main.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC})

@@ -35,6 +35,8 @@ find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(unofficial-minizip CONFIG REQUIRED)
 
 add_subdirectory(unified3D)
 

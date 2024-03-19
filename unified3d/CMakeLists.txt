@@ -121,12 +121,24 @@ set(UTILITY_FILES
         utility/Random.cpp
         utility/Timer.h
         utility/Timer.cpp
+        utility/Download.h
+        utility/Download.cpp
+        utility/Extract.h
+        utility/Extract.cpp
+        utility/ExtractZIP.h
+        utility/ExtractZIP.cpp
+)
+
+set(DATA_FILES
+        data/Dataset.h
+        data/Dataset.cpp
 )
 
 set(PROJECT_FILES
         ${CORE_FILES}
         ${METAL_FILES}
         ${UTILITY_FILES}
+        ${DATA_FILES}
 )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
@@ -150,6 +162,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         JsonCpp::JsonCpp
         lapacke
         openblas
+        OpenSSL::SSL OpenSSL::Crypto
+        unofficial::minizip::minizip
 )
 
 #set(KERNEL_FIELS
