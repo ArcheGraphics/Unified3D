@@ -246,6 +246,14 @@ set(IO_FILES
         io/VoxelGridIO.cpp
 )
 
+set(VISUALIZATION_FILES
+        visualization/operations.h
+        visualization/renderer.h
+        visualization/renderer.cpp
+        visualization/windows.h
+        visualization/windows.cpp
+)
+
 set(PROJECT_FILES
         ${CORE_FILES}
         ${METAL_FILES}
@@ -255,6 +263,7 @@ set(PROJECT_FILES
         ${GEOMETRY_FILES}
         ${CAMERA_FILES}
         ${IO_FILES}
+        ${VISUALIZATION_FILES}
 )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
@@ -282,6 +291,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         unofficial::minizip::minizip
         Qhull::qhullcpp
         PoissonRecon::PoissonRecon
+        OpenVDB::openvdb blosc_static
+        ${VTK_LIBRARIES}
         "-framework Metal"
         "-framework MetalKit"
         "-framework AppKit"

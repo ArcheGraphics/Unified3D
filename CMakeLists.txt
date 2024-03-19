@@ -39,7 +39,21 @@ find_package(OpenSSL REQUIRED)
 find_package(unofficial-minizip CONFIG REQUIRED)
 find_package(Qhull CONFIG REQUIRED)
 find_package(PoissonRecon CONFIG REQUIRED)
+find_package(VTK COMPONENTS
+        CommonColor
+        CommonCore
+        FiltersSources
+        InteractionStyle
+        InteractionWidgets
+        RenderingContextOpenGL2
+        RenderingCore
+        RenderingFreeType
+        RenderingGL2PSOpenGL2
+        RenderingOpenGL2
+)
+find_package(OpenVDB CONFIG REQUIRED)
+find_package(blosc CONFIG REQUIRED)
 
 add_subdirectory(unified3D)
-
+add_subdirectory(apps)
 add_subdirectory(tests)
