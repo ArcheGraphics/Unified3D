@@ -10,7 +10,6 @@
 #include "unified3d/core/Dispatch.h"
 #include "unified3d/core/Dtype.h"
 #include "unified3d/core/Indexer.h"
-#include "unified3d/core/MemoryManager.h"
 #include "unified3d/core/Parallel.h"
 #include "unified3d/core/SizeVector.h"
 #include "unified3d/core/Tensor.h"
@@ -170,10 +169,8 @@ void CopyCPU(const Tensor& src, Tensor& dst) {
     Dtype dst_dtype = dst.GetDtype();
     if (src.IsContiguous() && dst.IsContiguous() &&
         src.GetShape() == dst.GetShape() && src_dtype == dst_dtype) {
-        //        MemoryManager::Memcpy(dst.GetDataPtr(), dst.GetDevice(),
-        //                              src.GetDataPtr(), src.GetDevice(),
-        //                              src_dtype.ByteSize() *
-        //                              shape.NumElements());
+        MemoryManager::MemcpyOnCpu(*dst.GetDataPtr(), *src.GetDataPtr(),
+                                   src_dtype.ByteSize() * shape.NumElements());
     } else if (dst.NumElements() > 1 && dst.IsContiguous() &&
                src.NumElements() == 1 && !src_dtype.IsObject()) {
         int64_t num_elements = dst.NumElements();

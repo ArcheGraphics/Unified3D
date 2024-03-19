@@ -13,14 +13,6 @@ namespace u3d::core {
 /// Top-level memory interface. Calls to any of the member functions will
 /// automatically dispatch the appropriate MemoryManagerDevice instance based on
 /// the provided device which is used to execute the requested functionality.
-///
-/// The memory managers are dispatched as follows:
-///
-/// DeviceType = CPU : MemoryManagerCPU
-/// DeviceType = CUDA :
-///   ENABLE_CACHED_CUDA_MANAGER = ON : MemoryManagerCached w/ MemoryManagerCUDA
-///   Otherwise :                      MemoryManagerCUDA
-///
 class MemoryManager {
 public:
     /// Allocates memory of \p byte_size bytes on device \p device and returns a
@@ -29,6 +21,26 @@ public:
 
     /// Frees previously allocated memory at address \p ptr on device \p device.
     static void Free(metal::Buffer ptr, const Device& device);
+
+    /// Copies \p num_bytes bytes of memory at address \p src_ptr on device
+    /// \p src_device to address \p dst_ptr on device \p dst_device.
+    static void MemcpyOnCpu(metal::Buffer& dst_ptr,
+                            const metal::Buffer& src_ptr,
+                            size_t num_bytes);
+
+    template <typename T>
+    static void MemcpyToHost(T* dst_ptr,
+                             const metal::Buffer& src_ptr,
+                             size_t num_bytes) {
+        std::memcpy(dst_ptr, src_ptr.CpuAddress(), num_bytes);
+    }
+
+    template <typename T>
+    static void MemcpyFromHost(metal::Buffer& dst_ptr,
+                               T* src_ptr,
+                               size_t num_bytes) {
+        std::memcpy(dst_ptr.CpuAddress(), src_ptr, num_bytes);
+    }
 };
 
 }  // namespace u3d::core

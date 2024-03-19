@@ -10,7 +10,9 @@
 #include <unified3d/metal/Device.h>
 
 namespace u3d::core::metal {
-void* Buffer::CpuAddress() { return (uint8_t*)ptr_->contents() + offset_; }
+void* Buffer::CpuAddress() const {
+    return (uint8_t*)ptr_->contents() + offset_;
+}
 
 uint64_t Buffer::GpuAddress() const { return ptr_->gpuAddress() + offset_; }
 

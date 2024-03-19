@@ -22,4 +22,10 @@ void MemoryManager::Free(metal::Buffer ptr, const Device& device) {
     metal::Allocator::GetInstance().Free(ptr);
 }
 
+void MemoryManager::MemcpyOnCpu(metal::Buffer& dst_ptr,
+                                const metal::Buffer& src_ptr,
+                                size_t num_bytes) {
+    std::memcpy(dst_ptr.CpuAddress(), src_ptr.CpuAddress(), num_bytes);
+}
+
 }  // namespace u3d::core

@@ -65,9 +65,8 @@ public:
         }
 
         // Copy data to blob
-        // todo MemoryManager::MemcpyFromHost(blob_->GetDataPtr(), GetDevice(),
-        //                              init_vals.data(),
-        //                              init_vals.size() * dtype.ByteSize());
+        MemoryManager::MemcpyFromHost(*blob_->GetDataPtr(), init_vals.data(),
+                                      init_vals.size() * dtype.ByteSize());
     }
 
     /// Constructor from raw host buffer. The memory will be copied.
@@ -81,11 +80,8 @@ public:
         AssertTemplateDtype<T>();
 
         // Copy data to blob
-        //        MemoryManager::MemcpyFromHost(blob_->GetDataPtr(),
-        //        GetDevice(),
-        //                                      init_vals,
-        //                                      shape_.NumElements() *
-        //                                      dtype.ByteSize());
+        MemoryManager::MemcpyFromHost(blob_->GetDataPtr(), init_vals,
+                                      shape_.NumElements() * dtype.ByteSize());
     }
 
     /// The fully specified constructor. Since you're responsible for creating
@@ -190,8 +186,7 @@ public:
                     "shape ()");
         }
         AssertTemplateDtype<Object>();
-        //        MemoryManager::MemcpyFromHost(GetDataPtr(), GetDevice(), &v,
-        //                                      sizeof(Object));
+        MemoryManager::MemcpyFromHost(GetDataPtr(), &v, sizeof(Object));
         return *this;
     }
 
@@ -595,8 +590,7 @@ public:
         }
         AssertTemplateDtype<T>();
         T value;
-        //        MemoryManager::MemcpyToHost(&value, data_ptr_, GetDevice(),
-        //        sizeof(T));
+        MemoryManager::MemcpyToHost(&value, *data_ptr_, sizeof(T));
         return value;
     }
 
@@ -1005,11 +999,8 @@ public:
     std::vector<T> ToFlatVector() const {
         AssertTemplateDtype<T>();
         std::vector<T> values(NumElements());
-        //        MemoryManager::MemcpyToHost(values.data(),
-        //        Contiguous().GetDataPtr(),
-        //                                    GetDevice(),
-        //                                    GetDtype().ByteSize() *
-        //                                    NumElements());
+        MemoryManager::MemcpyToHost(values.data(), Contiguous().GetDataPtr(),
+                                    GetDtype().ByteSize() * NumElements());
         return values;
     }
 
@@ -1340,10 +1331,8 @@ inline Tensor::Tensor(const std::vector<bool>& init_vals,
     std::transform(init_vals.begin(), init_vals.end(), init_vals_uchar.begin(),
                    [](bool v) -> uint8_t { return static_cast<uint8_t>(v); });
 
-    //    MemoryManager::MemcpyFromHost(blob_->GetDataPtr(), GetDevice(),
-    //                                  init_vals_uchar.data(),
-    //                                  init_vals_uchar.size() *
-    //                                  dtype.ByteSize());
+    MemoryManager::MemcpyFromHost(*blob_->GetDataPtr(), init_vals_uchar.data(),
+                                  init_vals_uchar.size() * dtype.ByteSize());
 }
 
 template <>
@@ -1351,10 +1340,8 @@ inline std::vector<bool> Tensor::ToFlatVector() const {
     AssertTemplateDtype<bool>();
     std::vector<bool> values(NumElements());
     std::vector<uint8_t> values_uchar(NumElements());
-    //    MemoryManager::MemcpyToHost(values_uchar.data(),
-    //    Contiguous().GetDataPtr(),
-    //                                GetDevice(),
-    //                                GetDtype().ByteSize() * NumElements());
+    MemoryManager::MemcpyToHost(values_uchar.data(), *Contiguous().GetDataPtr(),
+                                GetDtype().ByteSize() * NumElements());
 
     // std::vector<bool> possibly implements 1-bit-sized boolean storage.
     // Open3D uses 1-byte-sized boolean storage for easy indexing.
@@ -1371,8 +1358,7 @@ inline bool Tensor::Item() const {
     }
     AssertTemplateDtype<bool>();
     uint8_t value = 0;
-    //    MemoryManager::MemcpyToHost(&value, data_ptr_, GetDevice(),
-    //                                sizeof(uint8_t));
+    MemoryManager::MemcpyToHost(&value, *data_ptr_, sizeof(uint8_t));
     return static_cast<bool>(value);
 }
 

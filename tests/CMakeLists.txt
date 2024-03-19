@@ -22,7 +22,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        unified3D
-        metal-cpp
-        GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main
+        Unified3D
+        GTest::gtest_main GTest::gmock
 )

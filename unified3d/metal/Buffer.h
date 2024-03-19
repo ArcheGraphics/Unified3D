@@ -24,7 +24,7 @@ public:
         : ptr_(ptr), offset_{offset} {};
 
     // Get the raw data pointer from the buffer
-    void* CpuAddress();
+    [[nodiscard]] void* CpuAddress() const;
 
     [[nodiscard]] uint64_t GpuAddress() const;
 
