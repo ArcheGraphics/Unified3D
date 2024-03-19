@@ -89,4 +89,3 @@ bool WriteOctreeToJson(const std::string &filename,
     return WriteIJsonConvertibleToJSON(filename, octree);
 }
 }  // namespace u3d::io
-   // namespace open3d

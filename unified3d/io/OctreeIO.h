@@ -37,4 +37,3 @@ bool WriteOctreeToJson(const std::string &filename,
                        const geometry::Octree &octree);
 
 }  // namespace u3d::io
-   // namespace open3d

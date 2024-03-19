@@ -225,4 +225,3 @@ bool WritePointCloudToPTS(const std::string &filename,
                           const WritePointCloudOption &params);
 
 }  // namespace u3d::io
-   // namespace open3d

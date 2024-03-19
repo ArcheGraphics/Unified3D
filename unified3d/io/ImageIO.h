@@ -77,4 +77,3 @@ bool ReadJPGFromMemory(const unsigned char *image_data_ptr,
                        geometry::Image &image);
 
 }  // namespace u3d::io
-   // namespace open3d

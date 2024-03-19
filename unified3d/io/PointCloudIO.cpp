@@ -233,4 +233,3 @@ bool WritePointCloud(unsigned char *&buffer,
 }
 
 }  // namespace u3d::io
-   // namespace open3d

@@ -49,4 +49,3 @@ bool WriteLineSetToPLY(const std::string &filename,
                        bool print_progress = false);
 
 }  // namespace u3d::io
-   // namespace open3d

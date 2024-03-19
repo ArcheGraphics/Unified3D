@@ -48,4 +48,3 @@ bool WritePinholeCameraTrajectoryToTUM(
         const camera::PinholeCameraTrajectory &trajectory);
 
 }  // namespace u3d::io
-   // namespace open3d

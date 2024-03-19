@@ -215,6 +215,19 @@ set(CAMERA_FILES
 )
 
 set(IO_FILES
+        io/file_format/FileJPG.cpp
+        io/file_format/FileJSON.cpp
+        io/file_format/FileLOG.cpp
+        io/file_format/FileOFF.cpp
+        io/file_format/FilePNG.cpp
+        io/file_format/FilePTS.cpp
+        io/file_format/FileSTL.cpp
+        io/file_format/FileTUM.cpp
+        io/file_format/FileXYZ.cpp
+        io/file_format/FileXYZN.cpp
+        io/file_format/FileXYZRGB.cpp
+        io/FileFormatIO.h
+        io/FileFormatIO.cpp
         io/IJsonConvertibleIO.h
         io/IJsonConvertibleIO.cpp
         io/ImageIO.h

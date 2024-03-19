@@ -149,4 +149,3 @@ bool AddTrianglesByEarClipping(geometry::TriangleMesh &mesh,
                                std::vector<unsigned int> &indices);
 
 }  // namespace u3d::io
-   // namespace open3d

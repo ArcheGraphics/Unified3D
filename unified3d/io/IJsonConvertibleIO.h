@@ -84,4 +84,3 @@ bool WriteIJsonConvertibleToJSONString(std::string &json_string,
     }
 
 }  // namespace u3d::io
-   // namespace open3d
