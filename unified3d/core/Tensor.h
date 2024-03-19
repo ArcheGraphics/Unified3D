@@ -999,7 +999,7 @@ public:
     std::vector<T> ToFlatVector() const {
         AssertTemplateDtype<T>();
         std::vector<T> values(NumElements());
-        MemoryManager::MemcpyToHost(values.data(), Contiguous().GetDataPtr(),
+        MemoryManager::MemcpyToHost(values.data(), *Contiguous().GetDataPtr(),
                                     GetDtype().ByteSize() * NumElements());
         return values;
     }
