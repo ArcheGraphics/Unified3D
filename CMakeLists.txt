@@ -20,10 +20,10 @@ endif ()
 
 cmake_minimum_required(VERSION 3.27)
 
-project(Unified3D)
+project(Unified3DProject)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED 20)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED 17)
 
 # Add path for local cmake scripts
 list(APPEND CMAKE_MODULE_PATH
@@ -33,10 +33,9 @@ include(build_metallib)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-
-set(MLX_METAL_PATH ${CMAKE_CURRENT_BINARY_DIR}/kernels/)
-
-# Add third party libraries
-add_subdirectory(third_party)
+find_package(Eigen3 CONFIG REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
 
 add_subdirectory(unified3D)
+
+add_subdirectory(tests)

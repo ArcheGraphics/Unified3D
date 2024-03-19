@@ -17,5 +17,11 @@
   }, {
     "name" : "benchmark",
     "version>=" : "1.8.3"
+  }, {
+    "name" : "eigen3",
+    "version>=" : "3.4.0#4"
+  }, {
+    "name" : "jsoncpp",
+    "version>=" : "1.9.5#2"
   } ]
 }

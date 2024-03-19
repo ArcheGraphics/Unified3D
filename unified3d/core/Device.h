@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace unified3d::core {
+namespace u3d::core {
 
 /// Device context specifying device type and device id.
 /// For CPU, there is only one device with id 0.
@@ -94,12 +94,12 @@ public:
     }
 };
 
-}  // namespace unified3d::core
+}  // namespace u3d::core
 
 namespace std {
 template <>
-struct hash<unified3d::core::Device> {
-    std::size_t operator()(const unified3d::core::Device &device) const {
+struct hash<u3d::core::Device> {
+    std::size_t operator()(const u3d::core::Device &device) const {
         return std::hash<std::string>{}(device.ToString());
     }
 };

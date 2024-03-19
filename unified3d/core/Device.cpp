@@ -4,16 +4,15 @@
 //  personal capacity and am not conveying any rights to any intellectual
 //  property of any third parties.
 
-#include <unified3D/core/Device.h>
+#include <unified3d/core/Device.h>
 
 #include <string>
 #include <vector>
 
-// #include "open3d/core/CUDAUtils.h"
-// #include "open3d/utility/Helper.h"
-// #include "open3d/utility/Logging.h"
+#include <unified3d/utility/Helper.h>
+#include <unified3d/utility/Logging.h>
 
-namespace unified3d::core {
+namespace u3d::core {
 
 static Device::DeviceType StringToDeviceType(const std::string &type_colon_id) {
     const std::vector<std::string> tokens =
@@ -81,7 +80,7 @@ bool Device::operator<(const Device &other) const {
 }
 
 std::string Device::ToString() const {
-    std::string str = "";
+    std::string str;
     switch (device_type_) {
         case DeviceType::CPU:
             str += "CPU";
@@ -120,8 +119,8 @@ std::vector<Device> Device::GetAvailableCPUDevices() {
 
 std::vector<Device> Device::GetAvailableGPUDevices() {
     std::vector<Device> devices;
-    for (int i = 0; i < GPU::DeviceCount(); i++) {
-        devices.push_back(Device(DeviceType::GPU, i));
+    for (int i = 0; i < 1; i++) {
+        devices.emplace_back(DeviceType::GPU, i);
     }
     return devices;
 }
@@ -132,4 +131,4 @@ void Device::PrintAvailableDevices() {
     }
 }
 
-}  // namespace unified3d::core
+}  // namespace u3d::core
