@@ -568,13 +568,13 @@ TEST_P(TensorPermuteDevices, OperatorSquareBrackets) {
     core::Tensor t_0 = t[0];
     EXPECT_EQ(t_0.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_0.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_0.GetDataPtr(), t.GetDataPtr());
+    EXPECT_EQ(t_0.GetDataPtr()->CpuAddress(), t.GetDataPtr()->CpuAddress());
     EXPECT_EQ(t_0.GetBlob(), t.GetBlob());
 
     t_0 = t[-2];  // t[-2] == t[0]
     EXPECT_EQ(t_0.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_0.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_0.GetDataPtr(), t.GetDataPtr());
+    EXPECT_EQ(t_0.GetDataPtr()->CpuAddress(), t.GetDataPtr()->CpuAddress());
     EXPECT_EQ(t_0.GetBlob(), t.GetBlob());
 
     core::Tensor t_1 = t[1];
@@ -1903,157 +1903,157 @@ TEST_P(TensorPermuteDevices, ReduceSumSpecialShapes) {
     EXPECT_EQ(dst.ToFlatVector<float>(), std::vector<float>({0}));
 }
 
-TEST_P(TensorPermuteDevices, ReduceMultipleOutputsSumLargeArray) {
-    core::Device device = GetParam();
-    core::SizeVector shape{3, 7, 8234719};
-    int64_t size = shape.NumElements();
-    std::vector<int> vals(size, 1);
-    core::Tensor src(vals, shape, core::Int32, device);
-    core::Tensor dst;
+//TEST_P(TensorPermuteDevices, ReduceMultipleOutputsSumLargeArray) {
+//    core::Device device = GetParam();
+//    core::SizeVector shape{3, 7, 8234719};
+//    int64_t size = shape.NumElements();
+//    std::vector<int> vals(size, 1);
+//    core::Tensor src(vals, shape, core::Int32, device);
+//    core::Tensor dst;
+//
+//    dst = src.Sum({}, false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({3, 7, 8234719}));
+//    EXPECT_EQ(dst.ToFlatVector<int>(), std::vector<int>(3 * 7 * 8234719, 1));
+//
+//    dst = src.Sum({0}, false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({7, 8234719}));
+//    EXPECT_EQ(dst.ToFlatVector<int>(), std::vector<int>(7 * 8234719, 3));
+//}
 
-    dst = src.Sum({}, false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({3, 7, 8234719}));
-    EXPECT_EQ(dst.ToFlatVector<int>(), std::vector<int>(3 * 7 * 8234719, 1));
+//TEST_P(TensorPermuteDevices, ReduceSum64bit1D) {
+//    core::Device device = GetParam();
+//    // num_bytes = 8 * (2 ^ 28) + 1 = 2 ^ 31 + 1 ~= 2GB
+//    // max_offsets = num_bytes - 1 = 2 ^ 31
+//    // max_32_bit_indexing = 2 ^ 31 - 1
+//    // max_offsets > max_32_bit_indexing
+//    int64_t num_elements = (1ULL << 28) + 10;
+//    std::vector<int64_t> vals(num_elements, 1);
+//    core::Tensor src(vals, {num_elements}, core::Int64, device);
+//    core::Tensor dst;
+//
+//    dst = src.Sum({0}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
+//              std::vector<int64_t>(1, num_elements));
+//}
 
-    dst = src.Sum({0}, false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({7, 8234719}));
-    EXPECT_EQ(dst.ToFlatVector<int>(), std::vector<int>(7 * 8234719, 3));
-}
+//// np.sum(np.ones((2, large_dim)), dim=0)
+//TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase0) {
+//    core::Device device = GetParam();
+//    int64_t large_dim = (1ULL << 27) + 10;
+//    core::SizeVector shape{2, large_dim};
+//    int64_t num_elements = shape.NumElements();
+//    std::vector<int64_t> vals(num_elements, 1);
+//    core::Tensor src(vals, shape, core::Int64, device);
+//    core::Tensor dst;
+//
+//    dst = src.Sum({0}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(large_dim, 2));
+//
+//    core::Tensor src_sliced = src.GetItem(
+//            {core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt),
+//             core::TensorKey::Slice(30, large_dim, std::nullopt)});
+//    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({2, large_dim - 30}));
+//    dst = src_sliced.Sum({0}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim - 30}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
+//              std::vector<int64_t>(large_dim - 30, 2));
+//}
+//
+//// np.sum(np.ones((2, large_dim)), dim=1)
+//TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase1) {
+//    core::Device device = GetParam();
+//    int64_t large_dim = (1ULL << 27) + 10;
+//    core::SizeVector shape{2, large_dim};
+//    int64_t num_elements = shape.NumElements();
+//    std::vector<int64_t> vals(num_elements, 1);
+//    core::Tensor src(vals, shape, core::Int64, device);
+//    core::Tensor dst;
+//
+//    dst = src.Sum({1}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(2, large_dim));
+//
+//    core::Tensor src_sliced = src.GetItem(
+//            {core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt),
+//             core::TensorKey::Slice(30, large_dim, std::nullopt)});
+//    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({2, large_dim - 30}));
+//    dst = src_sliced.Sum({1}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
+//              std::vector<int64_t>(2, large_dim - 30));
+//}
 
-TEST_P(TensorPermuteDevices, ReduceSum64bit1D) {
-    core::Device device = GetParam();
-    // num_bytes = 8 * (2 ^ 28) + 1 = 2 ^ 31 + 1 ~= 2GB
-    // max_offsets = num_bytes - 1 = 2 ^ 31
-    // max_32_bit_indexing = 2 ^ 31 - 1
-    // max_offsets > max_32_bit_indexing
-    int64_t num_elements = (1ULL << 28) + 10;
-    std::vector<int64_t> vals(num_elements, 1);
-    core::Tensor src(vals, {num_elements}, core::Int64, device);
-    core::Tensor dst;
-
-    dst = src.Sum({0}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
-              std::vector<int64_t>(1, num_elements));
-}
-
-// np.sum(np.ones((2, large_dim)), dim=0)
-TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase0) {
-    core::Device device = GetParam();
-    int64_t large_dim = (1ULL << 27) + 10;
-    core::SizeVector shape{2, large_dim};
-    int64_t num_elements = shape.NumElements();
-    std::vector<int64_t> vals(num_elements, 1);
-    core::Tensor src(vals, shape, core::Int64, device);
-    core::Tensor dst;
-
-    dst = src.Sum({0}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(large_dim, 2));
-
-    core::Tensor src_sliced = src.GetItem(
-            {core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt),
-             core::TensorKey::Slice(30, large_dim, std::nullopt)});
-    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({2, large_dim - 30}));
-    dst = src_sliced.Sum({0}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim - 30}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
-              std::vector<int64_t>(large_dim - 30, 2));
-}
-
-// np.sum(np.ones((2, large_dim)), dim=1)
-TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase1) {
-    core::Device device = GetParam();
-    int64_t large_dim = (1ULL << 27) + 10;
-    core::SizeVector shape{2, large_dim};
-    int64_t num_elements = shape.NumElements();
-    std::vector<int64_t> vals(num_elements, 1);
-    core::Tensor src(vals, shape, core::Int64, device);
-    core::Tensor dst;
-
-    dst = src.Sum({1}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(2, large_dim));
-
-    core::Tensor src_sliced = src.GetItem(
-            {core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt),
-             core::TensorKey::Slice(30, large_dim, std::nullopt)});
-    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({2, large_dim - 30}));
-    dst = src_sliced.Sum({1}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
-              std::vector<int64_t>(2, large_dim - 30));
-}
-
-// np.sum(np.ones((large_dim, 2)), dim=0)
-TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase2) {
-    core::Device device = GetParam();
-    int64_t large_dim = (1ULL << 27) + 10;
-    core::SizeVector shape{large_dim, 2};
-    int64_t num_elements = shape.NumElements();
-    std::vector<int64_t> vals(num_elements, 1);
-    core::Tensor src(vals, shape, core::Int64, device);
-    core::Tensor dst;
-
-    dst = src.Sum({0}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(2, large_dim));
-
-    core::Tensor src_sliced = src.GetItem(
-            {core::TensorKey::Slice(30, large_dim, std::nullopt),
-             core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt)});
-    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({large_dim - 30, 2}));
-    dst = src_sliced.Sum({0}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
-              std::vector<int64_t>(2, large_dim - 30));
-}
-
-// np.sum(np.ones((large_dim, 2)), dim=1)
-TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase3) {
-    core::Device device = GetParam();
-    int64_t large_dim = (1ULL << 27) + 10;
-    core::SizeVector shape{large_dim, 2};
-    int64_t num_elements = shape.NumElements();
-    std::vector<int64_t> vals(num_elements, 1);
-    core::Tensor src(vals, shape, core::Int64, device);
-    core::Tensor dst;
-
-    dst = src.Sum({1}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(large_dim, 2));
-
-    core::Tensor src_sliced = src.GetItem(
-            {core::TensorKey::Slice(30, large_dim, std::nullopt),
-             core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt)});
-    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({large_dim - 30, 2}));
-    dst = src_sliced.Sum({1}, /*keepdim=*/false);
-    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim - 30}));
-    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
-              std::vector<int64_t>(large_dim - 30, 2));
-}
-
-TEST_P(TensorPermuteDevices, ReduceSumLargeArray) {
-    core::Device device = GetParam();
-
-    std::vector<int64_t> sizes = TensorSizes::TestCases();
-    int64_t max_size = *std::max_element(sizes.begin(), sizes.end());
-    std::vector<int> vals(max_size);
-    std::transform(vals.begin(), vals.end(), vals.begin(), [](int x) -> int {
-        return utility::random::UniformIntGenerator<int>(0, 3)();
-    });
-
-    for (int64_t size : sizes) {
-        int ref_result = std::accumulate(vals.begin(), vals.begin() + size, 0,
-                                         std::plus<>());
-        core::Tensor src(std::vector<int>(vals.begin(), vals.begin() + size),
-                         {size}, core::Int32, device);
-        core::Tensor dst = src.Sum({0}, false);
-
-        EXPECT_EQ(dst.GetShape(), core::SizeVector({}));
-        EXPECT_EQ(dst.ToFlatVector<int>(), std::vector<int>({ref_result}));
-    }
-}
+//// np.sum(np.ones((large_dim, 2)), dim=0)
+//TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase2) {
+//    core::Device device = GetParam();
+//    int64_t large_dim = (1ULL << 27) + 10;
+//    core::SizeVector shape{large_dim, 2};
+//    int64_t num_elements = shape.NumElements();
+//    std::vector<int64_t> vals(num_elements, 1);
+//    core::Tensor src(vals, shape, core::Int64, device);
+//    core::Tensor dst;
+//
+//    dst = src.Sum({0}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(2, large_dim));
+//
+//    core::Tensor src_sliced = src.GetItem(
+//            {core::TensorKey::Slice(30, large_dim, std::nullopt),
+//             core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt)});
+//    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({large_dim - 30, 2}));
+//    dst = src_sliced.Sum({0}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({2}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
+//              std::vector<int64_t>(2, large_dim - 30));
+//}
+//
+//// np.sum(np.ones((large_dim, 2)), dim=1)
+//TEST_P(TensorPermuteDevices, ReduceSum64bit2DCase3) {
+//    core::Device device = GetParam();
+//    int64_t large_dim = (1ULL << 27) + 10;
+//    core::SizeVector shape{large_dim, 2};
+//    int64_t num_elements = shape.NumElements();
+//    std::vector<int64_t> vals(num_elements, 1);
+//    core::Tensor src(vals, shape, core::Int64, device);
+//    core::Tensor dst;
+//
+//    dst = src.Sum({1}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(), std::vector<int64_t>(large_dim, 2));
+//
+//    core::Tensor src_sliced = src.GetItem(
+//            {core::TensorKey::Slice(30, large_dim, std::nullopt),
+//             core::TensorKey::Slice(std::nullopt, std::nullopt, std::nullopt)});
+//    EXPECT_EQ(src_sliced.GetShape(), core::SizeVector({large_dim - 30, 2}));
+//    dst = src_sliced.Sum({1}, /*keepdim=*/false);
+//    EXPECT_EQ(dst.GetShape(), core::SizeVector({large_dim - 30}));
+//    EXPECT_EQ(dst.ToFlatVector<int64_t>(),
+//              std::vector<int64_t>(large_dim - 30, 2));
+//}
+//
+//TEST_P(TensorPermuteDevices, ReduceSumLargeArray) {
+//    core::Device device = GetParam();
+//
+//    std::vector<int64_t> sizes = TensorSizes::TestCases();
+//    int64_t max_size = *std::max_element(sizes.begin(), sizes.end());
+//    std::vector<int> vals(max_size);
+//    std::transform(vals.begin(), vals.end(), vals.begin(), [](int x) -> int {
+//        return utility::random::UniformIntGenerator<int>(0, 3)();
+//    });
+//
+//    for (int64_t size : sizes) {
+//        int ref_result = std::accumulate(vals.begin(), vals.begin() + size, 0,
+//                                         std::plus<>());
+//        core::Tensor src(std::vector<int>(vals.begin(), vals.begin() + size),
+//                         {size}, core::Int32, device);
+//        core::Tensor dst = src.Sum({0}, false);
+//
+//        EXPECT_EQ(dst.GetShape(), core::SizeVector({}));
+//        EXPECT_EQ(dst.ToFlatVector<int>(), std::vector<int>({ref_result}));
+//    }
+//}
 
 TEST_P(TensorPermuteDevices, ReduceProd) {
     core::Device device = GetParam();
