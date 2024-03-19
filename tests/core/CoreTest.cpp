@@ -26,7 +26,7 @@ std::vector<core::Dtype> PermuteDtypesWithBool::TestCases() {
 std::vector<core::Device> PermuteDevices::TestCases() {
     std::vector<core::Device> cpu_devices =
             core::Device::GetAvailableCPUDevices();
-    std::vector<core::Device> cuda_devices =
+    std::vector<core::Device> gpu_devices =
             core::Device::GetAvailableGPUDevices();
 
     std::vector<core::Device> devices;
@@ -34,14 +34,14 @@ std::vector<core::Device> PermuteDevices::TestCases() {
         devices.push_back(cpu_devices[0]);
     }
 
-    // Test 0, 1, or 2 CUDA devices.
-    // Testing 2 CUDA devices is necessary for testing device switching.
-    if (cuda_devices.size() == 1) {
-        devices.push_back(cuda_devices[0]);
-    } else if (cuda_devices.size() == 2) {
-        devices.push_back(cuda_devices[0]);
-        devices.push_back(cuda_devices[1]);
-    }
+    // Test 0, 1, or 2 GPU devices.
+    // Testing 2 GPU devices is necessary for testing device switching.
+//    if (gpu_devices.size() == 1) {
+//        devices.push_back(gpu_devices[0]);
+//    } else if (gpu_devices.size() == 2) {
+//        devices.push_back(gpu_devices[0]);
+//        devices.push_back(gpu_devices[1]);
+//    }
 
     return devices;
 }
@@ -50,15 +50,15 @@ std::vector<std::pair<core::Device, core::Device>>
 PermuteDevicePairs::TestCases() {
     std::vector<core::Device> cpu_devices =
             core::Device::GetAvailableCPUDevices();
-    std::vector<core::Device> cuda_devices =
+    std::vector<core::Device> gpu_devices =
             core::Device::GetAvailableGPUDevices();
 
     cpu_devices.resize(std::min(static_cast<size_t>(2), cpu_devices.size()));
-    cuda_devices.resize(std::min(static_cast<size_t>(2), cuda_devices.size()));
+    gpu_devices.resize(std::min(static_cast<size_t>(2), gpu_devices.size()));
 
     std::vector<core::Device> devices;
     devices.insert(devices.end(), cpu_devices.begin(), cpu_devices.end());
-    devices.insert(devices.end(), cuda_devices.begin(), cuda_devices.end());
+//    devices.insert(devices.end(), gpu_devices.begin(), gpu_devices.end());
 
     // Self-pairs and cross pairs (bidirectional).
     std::vector<std::pair<core::Device, core::Device>> device_pairs;

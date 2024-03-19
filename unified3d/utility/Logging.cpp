@@ -48,7 +48,7 @@ struct Logger::Impl {
         msg << fmt::sprintf("%c[%d;%dm", 0x1B, highlight_text,
                             (int)text_color + 30);
         msg << text;
-        msg << fmt::sprintf("%c[0;m", "%s", 0x1B);
+        msg << fmt::sprintf("%c[0;m", 0x1B);
         return msg.str();
     }
 };

@@ -118,11 +118,7 @@ std::vector<Device> Device::GetAvailableCPUDevices() {
 }
 
 std::vector<Device> Device::GetAvailableGPUDevices() {
-    std::vector<Device> devices;
-    for (int i = 0; i < 1; i++) {
-        devices.emplace_back(DeviceType::GPU, i);
-    }
-    return devices;
+    return {Device(DeviceType::GPU, 0)};
 }
 
 void Device::PrintAvailableDevices() {
