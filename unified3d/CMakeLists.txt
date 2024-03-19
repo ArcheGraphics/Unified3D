@@ -139,12 +139,89 @@ set(TENSOR_FILES
         tensor/io/NumpyIO.cpp
 )
 
+set(GEOMETRY_FILES
+        geometry/BoundingVolume.h
+        geometry/BoundingVolume.cpp
+        geometry/Image.h
+        geometry/Image.cpp
+        geometry/ImageFactory.cpp
+        geometry/RGBDImage.h
+        geometry/RGBDImage.cpp
+        geometry/RGBDImageFactory.cpp
+
+        geometry/MeshBase.h
+        geometry/MeshBase.cpp
+        geometry/TetraMesh.h
+        geometry/TetraMesh.cpp
+        geometry/TetraMeshFactory.cpp
+        geometry/TriangleMesh.h
+        geometry/TriangleMesh.cpp
+        geometry/TriangleMeshFactory.cpp
+        geometry/TriangleMeshDeformation.cpp
+        geometry/TriangleMeshSimplification.cpp
+        geometry/TriangleMeshSubdivide.cpp
+        geometry/HalfEdgeTriangleMesh.h
+        geometry/HalfEdgeTriangleMesh.cpp
+
+        geometry/PointCloud.h
+        geometry/PointCloud.cpp
+        geometry/PointCloudCluster.cpp
+        geometry/PointCloudFactory.cpp
+        geometry/PointCloudPlanarPatchDetection.cpp
+        geometry/PointCloudSegmentation.cpp
+
+        geometry/KDTreeFlann.h
+        geometry/KDTreeFlann.cpp
+        geometry/KDTreeSearchParam.h
+
+        geometry/VoxelGrid.h
+        geometry/VoxelGrid.cpp
+        geometry/VoxelGridFactory.cpp
+
+        geometry/Geometry.h
+        geometry/Geometry2D.h
+        geometry/Geometry3D.h
+        geometry/Geometry3D.cpp
+
+        geometry/Line3D.h
+        geometry/Line3D.cpp
+        geometry/LineSet.h
+        geometry/LineSet.cpp
+        geometry/LineSetFactory.cpp
+
+        geometry/Octree.h
+        geometry/Octree.cpp
+
+        geometry/Qhull.h
+        geometry/Qhull.cpp
+
+        geometry/IntersectionTest.h
+        geometry/IntersectionTest.cpp
+        geometry/Keypoint.h
+        geometry/ISSKeypoints.cpp
+#        geometry/SurfaceReconstructionAlphaShape.cpp
+        geometry/SurfaceReconstructionBallPivoting.cpp
+#        geometry/SurfaceReconstructionPoisson.cpp
+        geometry/EstimateNormals.cpp
+)
+
+set(CAMERA_FILES
+        camera/PinholeCameraIntrinsic.h
+        camera/PinholeCameraIntrinsic.cpp
+        camera/PinholeCameraParameters.h
+        camera/PinholeCameraParameters.cpp
+        camera/PinholeCameraTrajectory.h
+        camera/PinholeCameraTrajectory.cpp
+)
+
 set(PROJECT_FILES
         ${CORE_FILES}
         ${METAL_FILES}
         ${UTILITY_FILES}
         ${DATA_FILES}
         ${TENSOR_FILES}
+        ${GEOMETRY_FILES}
+        ${CAMERA_FILES}
 )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
@@ -170,6 +247,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         openblas
         OpenSSL::SSL OpenSSL::Crypto
         unofficial::minizip::minizip
+        Qhull::qhullcpp
+        PoissonRecon::PoissonRecon
         "-framework Metal"
         "-framework MetalKit"
         "-framework AppKit"

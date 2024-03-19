@@ -328,21 +328,7 @@ std::vector<std::string> FindFilesRecursively(
 }
 
 FILE *FOpen(const std::string &filename, const std::string &mode) {
-    FILE *fp;
-#ifndef _WIN32
-    fp = fopen(filename.c_str(), mode.c_str());
-#else
-    std::wstring filename_w;
-    filename_w.resize(filename.size());
-    int newSize = MultiByteToWideChar(CP_UTF8, 0, filename.c_str(),
-                                      static_cast<int>(filename.length()),
-                                      const_cast<wchar_t *>(filename_w.c_str()),
-                                      static_cast<int>(filename.length()));
-    filename_w.resize(newSize);
-    std::wstring mode_w(mode.begin(), mode.end());
-    fp = _wfopen(filename_w.c_str(), mode_w.c_str());
-#endif
-    return fp;
+    return fopen(filename.c_str(), mode.c_str());
 }
 
 std::string GetIOErrorString(const int errnoVal) {
@@ -354,10 +340,8 @@ std::string GetIOErrorString(const int errnoVal) {
         // Error below could be EWOULDBLOCK on Linux
         case EAGAIN:
             return "Resource unavailable, try again";
-#if !defined(WIN32)
         case EDQUOT:
             return "Over quota";
-#endif
         case EEXIST:
             return "File already exists";
         case EFAULT:

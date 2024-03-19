@@ -37,6 +37,8 @@ find_package(Eigen3 CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(unofficial-minizip CONFIG REQUIRED)
+find_package(Qhull CONFIG REQUIRED)
+find_package(PoissonRecon CONFIG REQUIRED)
 
 add_subdirectory(unified3D)
 
