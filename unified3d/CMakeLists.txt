@@ -214,6 +214,25 @@ set(CAMERA_FILES
         camera/PinholeCameraTrajectory.cpp
 )
 
+set(IO_FILES
+        io/IJsonConvertibleIO.h
+        io/IJsonConvertibleIO.cpp
+        io/ImageIO.h
+        io/ImageIO.cpp
+        io/LineSetIO.h
+        io/LineSetIO.cpp
+        io/OctreeIO.h
+        io/OctreeIO.cpp
+        io/PinholeCameraTrajectoryIO.h
+        io/PinholeCameraTrajectoryIO.cpp
+        io/PointCloudIO.h
+        io/PointCloudIO.cpp
+        io/TriangleMeshIO.h
+        io/TriangleMeshIO.cpp
+        io/VoxelGridIO.h
+        io/VoxelGridIO.cpp
+)
+
 set(PROJECT_FILES
         ${CORE_FILES}
         ${METAL_FILES}
@@ -222,6 +241,7 @@ set(PROJECT_FILES
         ${TENSOR_FILES}
         ${GEOMETRY_FILES}
         ${CAMERA_FILES}
+        ${IO_FILES}
 )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
