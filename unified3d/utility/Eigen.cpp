@@ -150,7 +150,7 @@ std::tuple<MatType, VecType, double> ComputeJTJandJTr(
     double r2_sum = 0.0;
     JTJ.setZero();
     JTr.setZero();
-#pragma omp parallel
+
     {
         MatType JTJ_private;
         VecType JTr_private;
@@ -161,14 +161,13 @@ std::tuple<MatType, VecType, double> ComputeJTJandJTr(
         J_r.setZero();
         double r = 0.0;
         double w = 0.0;
-#pragma omp for nowait
+
         for (int i = 0; i < iteration_num; i++) {
             f(i, J_r, r, w);
             JTJ_private.noalias() += J_r * w * J_r.transpose();
             JTr_private.noalias() += J_r * w * r;
             r2_sum_private += r * r;
         }
-#pragma omp critical(ComputeJTJandJTr)
         {
             JTJ += JTJ_private;
             JTr += JTr_private;
@@ -196,7 +195,6 @@ std::tuple<MatType, VecType, double> ComputeJTJandJTr(
     double r2_sum = 0.0;
     JTJ.setZero();
     JTr.setZero();
-#pragma omp parallel
     {
         MatType JTJ_private;
         VecType JTr_private;
@@ -206,7 +204,6 @@ std::tuple<MatType, VecType, double> ComputeJTJandJTr(
         std::vector<double> r;
         std::vector<double> w;
         std::vector<VecType, Eigen::aligned_allocator<VecType>> J_r;
-#pragma omp for nowait
         for (int i = 0; i < iteration_num; i++) {
             f(i, J_r, r, w);
             for (int j = 0; j < (int)r.size(); j++) {
@@ -215,7 +212,6 @@ std::tuple<MatType, VecType, double> ComputeJTJandJTr(
                 r2_sum_private += r[j] * r[j];
             }
         }
-#pragma omp critical(ComputeJTJandJTr)
         {
             JTJ += JTJ_private;
             JTr += JTr_private;

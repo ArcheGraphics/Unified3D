@@ -160,11 +160,9 @@ size_t Allocator::SetMemoryLimit(size_t limit, bool relaxed) {
     return limit;
 }
 
-Buffer Allocator::Malloc(size_t size, bool allow_swap /* = false */) {
+std::shared_ptr<Buffer> Allocator::Malloc(size_t size, bool allow_swap /* = false */) {
     // Metal doesn't like empty buffers
-    if (size == 0) {
-        return Buffer{nullptr};
-    }
+    size = std::max<size_t>(size, 4);
 
     // Align up memory
     if (size > vm_page_size) {
@@ -179,7 +177,7 @@ Buffer Allocator::Malloc(size_t size, bool allow_swap /* = false */) {
 
         // If there is too much memory pressure, fail (likely causes a wait).
         if (!(allow_swap && relaxed_) && mem_required >= block_limit_) {
-            return Buffer{nullptr};
+            return nullptr;
         }
 
         auto thread_pool = NewScopedMemoryPool();
@@ -207,11 +205,11 @@ Buffer Allocator::Malloc(size_t size, bool allow_swap /* = false */) {
         buffer_cache_.ReleaseCachedBuffers(GetCacheMemory() - max_pool_size_);
     }
 
-    return Buffer{buf};
+    return std::make_shared<Buffer>(buf, 0);
 }
 
-void Allocator::Free(Buffer buffer) {
-    auto buf = buffer.Ptr();
+void Allocator::Free(std::shared_ptr<Buffer>& buffer) {
+    auto buf = buffer->Ptr();
     std::unique_lock lk(mutex_);
     active_memory_ -= buf->length();
     if (GetCacheMemory() < max_pool_size_) {

@@ -78,7 +78,7 @@ MTL::Library* load_library(MTL::Device* device,
 Device::Device() {
     auto pool = NewScopedMemoryPool();
     device_ = load_device();
-    library_map_ = {{"mlx", load_library(device_)}};
+    // todo    library_map_ = {{"mlx", load_library(device_)}};
 }
 
 Device::~Device() {

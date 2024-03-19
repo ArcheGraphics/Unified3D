@@ -21,7 +21,11 @@ private:
 
 public:
     explicit Buffer(MTL::Buffer* ptr, uint64_t offset = 0)
-        : ptr_(ptr), offset_{offset} {};
+        : ptr_(ptr), offset_{offset} {
+        if (ptr_ == nullptr) {
+            int a = 12;
+        }
+    }
 
     // Get the raw data pointer from the buffer
     [[nodiscard]] void* CpuAddress() const;
@@ -76,8 +80,8 @@ class Allocator final {
 public:
     static Allocator& GetInstance();
 
-    Buffer Malloc(size_t size, bool allow_swap = false);
-    void Free(Buffer buffer);
+    std::shared_ptr<Buffer> Malloc(size_t size, bool allow_swap = false);
+    void Free(std::shared_ptr<Buffer>& buffer);
     [[nodiscard]] size_t GetActiveMemory() const { return active_memory_; };
     [[nodiscard]] size_t GetPeakMemory() const { return peak_memory_; };
     size_t GetCacheMemory() { return buffer_cache_.CacheSize(); };

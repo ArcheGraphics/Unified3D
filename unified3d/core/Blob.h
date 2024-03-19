@@ -41,8 +41,7 @@ public:
     /// \param device Device where the blob resides.
     Blob(int64_t byte_size, const Device& device)
         : deleter_(nullptr),
-          data_ptr_(std::make_shared<metal::Buffer>(
-                  MemoryManager::Malloc(byte_size, device))),
+          data_ptr_(MemoryManager::Malloc(byte_size, device)),
           device_(device) {}
 
     /// Construct Blob with externally managed memory.
@@ -65,7 +64,7 @@ public:
             // deleter.
             deleter_(nullptr);
         } else {
-            MemoryManager::Free(*data_ptr_, device_);
+            MemoryManager::Free(data_ptr_, device_);
         }
     };
 

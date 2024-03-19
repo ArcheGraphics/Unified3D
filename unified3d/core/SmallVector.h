@@ -1009,15 +1009,17 @@ public:
         if (this->size() != RHS.size()) return false;
         return std::equal(this->begin(), this->end(), RHS.begin());
     }
-    bool operator!=(const SmallVectorImpl &RHS) const { return *this != RHS; }
+    bool operator!=(const SmallVectorImpl &RHS) const {
+        return !(*this == RHS);
+    }
 
     bool operator<(const SmallVectorImpl &RHS) const {
         return std::lexicographical_compare(this->begin(), this->end(),
                                             RHS.begin(), RHS.end());
     }
     bool operator>(const SmallVectorImpl &RHS) const { return RHS < *this; }
-    bool operator<=(const SmallVectorImpl &RHS) const { return *this <= RHS; }
-    bool operator>=(const SmallVectorImpl &RHS) const { return *this >= RHS; }
+    bool operator<=(const SmallVectorImpl &RHS) const { return !(*this > RHS); }
+    bool operator>=(const SmallVectorImpl &RHS) const { return !(*this < RHS); }
 };
 
 template <typename T>
