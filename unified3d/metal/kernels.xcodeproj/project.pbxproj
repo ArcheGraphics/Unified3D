@@ -13,6 +13,8 @@
 /* Begin PBXFileReference section */
 		04EEE5EB2BABDAC800270A03 /* kernels.metallib */ = {isa = PBXFileReference; explicitFileType = "archive.metal-library"; includeInIndex = 0; path = kernels.metallib; sourceTree = BUILT_PRODUCTS_DIR; };
 		04EEE5EE2BABDAC800270A03 /* UnaryEW.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = UnaryEW.metal; sourceTree = "<group>"; };
+		04EEE5F52BABE07D00270A03 /* Indexer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Indexer.h; sourceTree = "<group>"; };
+		04EEE5F62BABE14D00270A03 /* MiniVec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MiniVec.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -36,6 +38,8 @@
 			isa = PBXGroup;
 			children = (
 				04EEE5EE2BABDAC800270A03 /* UnaryEW.metal */,
+				04EEE5F52BABE07D00270A03 /* Indexer.h */,
+				04EEE5F62BABE14D00270A03 /* MiniVec.h */,
 			);
 			path = kernels;
 			sourceTree = "<group>";

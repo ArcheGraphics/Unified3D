@@ -7,19 +7,26 @@
 #include <metal_stdlib>
 using namespace metal;
 
+#include "Indexer.h"
 
 template <typename src_t, typename dst_t>
 [[kernel]] void MetalCopyElementKernel(const device src_t* src, device dst_t* dst) {
     *dst = static_cast<dst_t>(src);
 }
 
-[[kernel]] void MetalCopyObjectElementKernel(const device char* src_bytes,
-                                             device char* dst_bytes,
-                                             constant int32_t& object_byte_size,
-                                             uint index [[thread_position_in_grid]]) {
+void MetalCopyObjectElementKernel(const device char* src_bytes,
+                                  device char* dst_bytes,
+                                  constant int32_t& object_byte_size) {
     for (int i = 0; i < object_byte_size; ++i) {
         dst_bytes[i] = src_bytes[i];
     }
+}
+
+[[kernel]] void MetalCopyObjectElementEntry(device u3d::metal::Indexer& indexer,
+                                            constant int32_t& object_byte_size,
+                                            uint index [[thread_position_in_grid]]) {
+    MetalCopyObjectElementKernel(indexer.GetInputPtr(0, index),
+                                 indexer.GetOutputPtr(index), object_byte_size);
 }
 
 template <typename scalar_t>
