@@ -34,9 +34,7 @@ void UnaryEW(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code);
 
 void UnaryEWCPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code);
 
-#ifdef BUILD_CUDA_MODULE
-void UnaryEWCUDA(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code);
-#endif
+void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code);
 
 // Copy is separated from other unary ops since it support cross-device copy and
 // dtype casting.
@@ -44,9 +42,7 @@ void Copy(const Tensor& src, Tensor& dst);
 
 void CopyCPU(const Tensor& src, Tensor& dst);
 
-#ifdef BUILD_CUDA_MODULE
-void CopyCUDA(const Tensor& src, Tensor& dst);
-#endif
+void CopyGPU(const Tensor& src, Tensor& dst);
 
 }  // namespace kernel
 }  // namespace core

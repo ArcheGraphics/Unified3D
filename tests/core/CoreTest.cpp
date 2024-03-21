@@ -36,12 +36,12 @@ std::vector<core::Device> PermuteDevices::TestCases() {
 
     // Test 0, 1, or 2 GPU devices.
     // Testing 2 GPU devices is necessary for testing device switching.
-//    if (gpu_devices.size() == 1) {
-//        devices.push_back(gpu_devices[0]);
-//    } else if (gpu_devices.size() == 2) {
-//        devices.push_back(gpu_devices[0]);
-//        devices.push_back(gpu_devices[1]);
-//    }
+    if (gpu_devices.size() == 1) {
+        devices.push_back(gpu_devices[0]);
+    } else if (gpu_devices.size() == 2) {
+        devices.push_back(gpu_devices[0]);
+        devices.push_back(gpu_devices[1]);
+    }
 
     return devices;
 }

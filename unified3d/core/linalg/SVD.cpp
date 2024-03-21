@@ -11,7 +11,7 @@
 namespace u3d::core {
 
 void SVD(const Tensor &A, Tensor &U, Tensor &S, Tensor &VT) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
 
     const Device device = A.GetDevice();
     const Dtype dtype = A.GetDtype();

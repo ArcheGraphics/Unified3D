@@ -23,7 +23,7 @@ void AddMM(const Tensor& A,
     const Device device = A.GetDevice();
     const Dtype dtype = A.GetDtype();
 
-    if (dtype != core::Float32 && dtype != core::Float64) {
+    if (dtype != core::Float32) {
         utility::LogError("AddMM is not implemented for {}.", dtype.ToString());
     }
 

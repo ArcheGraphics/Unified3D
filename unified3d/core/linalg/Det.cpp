@@ -12,7 +12,7 @@
 namespace u3d::core {
 
 double Det(const Tensor& A) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
     const Dtype dtype = A.GetDtype();
 
     double det = 1.0;

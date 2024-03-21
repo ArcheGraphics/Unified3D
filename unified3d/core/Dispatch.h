@@ -15,8 +15,6 @@
 /// Before:
 ///     if (dtype == core::Float32) {
 ///         func<float>(args);
-///     } else if (dtype == core::Float64) {
-///         func<double>(args);
 ///     } else ...
 ///
 /// Now:
@@ -30,9 +28,6 @@
     [&] {                                                     \
         if (DTYPE == u3d::core::Float32) {                    \
             using scalar_t = float;                           \
-            return __VA_ARGS__();                             \
-        } else if (DTYPE == u3d::core::Float64) {             \
-            using scalar_t = double;                          \
             return __VA_ARGS__();                             \
         } else if (DTYPE == u3d::core::Int8) {                \
             using scalar_t = int8_t;                          \
@@ -78,9 +73,7 @@
         if (DTYPE == u3d::core::Float32) {                    \
             using scalar_t = float;                           \
             return __VA_ARGS__();                             \
-        } else if (DTYPE == u3d::core::Float64) {             \
-            using scalar_t = double;                          \
-            return __VA_ARGS__();                             \
+            \                                                 \
         } else {                                              \
             u3d::utility::LogError("Unsupported data type."); \
         }                                                     \
@@ -95,16 +88,6 @@
         } else if (FDTYPE == u3d::core::Float32 &&                        \
                    IDTYPE == u3d::core::Int64) {                          \
             using scalar_t = float;                                       \
-            using int_t = int64_t;                                        \
-            return __VA_ARGS__();                                         \
-        } else if (FDTYPE == u3d::core::Float64 &&                        \
-                   IDTYPE == u3d::core::Int32) {                          \
-            using scalar_t = double;                                      \
-            using int_t = int32_t;                                        \
-            return __VA_ARGS__();                                         \
-        } else if (FDTYPE == u3d::core::Float64 &&                        \
-                   IDTYPE == u3d::core::Int64) {                          \
-            using scalar_t = double;                                      \
             using int_t = int64_t;                                        \
             return __VA_ARGS__();                                         \
         } else {                                                          \

@@ -59,7 +59,7 @@ static void OutputToPLU(const Tensor& output,
 }
 
 void LUIpiv(const Tensor& A, Tensor& ipiv, Tensor& output) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
 
     const Device device = A.GetDevice();
     const Dtype dtype = A.GetDtype();
@@ -121,7 +121,7 @@ void LU(const Tensor& A,
         Tensor& lower,
         Tensor& upper,
         const bool permute_l) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
 
     // Get output matrix and ipiv.
     core::Tensor ipiv, output;

@@ -17,7 +17,7 @@
 namespace u3d::core {
 
 void Solve(const Tensor &A, const Tensor &B, Tensor &X) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
     const Device device = A.GetDevice();
     const Dtype dtype = A.GetDtype();
 

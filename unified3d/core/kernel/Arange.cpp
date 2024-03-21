@@ -61,11 +61,7 @@ Tensor Arange(const Tensor& start, const Tensor& stop, const Tensor& step) {
     if (device.IsCPU()) {
         ArangeCPU(start, stop, step, dst);
     } else if (device.IsGPU()) {
-#ifdef BUILD_CUDA_MODULE
-        ArangeCUDA(start, stop, step, dst);
-#else
-        utility::LogError("Not compiled with CUDA, but CUDA device is used.");
-#endif
+        ArangeGPU(start, stop, step, dst);
     } else {
         utility::LogError("Arange: Unimplemented device.");
     }

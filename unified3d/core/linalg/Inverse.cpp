@@ -13,7 +13,7 @@
 namespace u3d::core {
 
 void Inverse(const Tensor &A, Tensor &output) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
 
     const Device device = A.GetDevice();
     const Dtype dtype = A.GetDtype();

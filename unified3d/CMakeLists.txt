@@ -42,6 +42,7 @@ set(CORE_FILES
         core/kernel/Kernel.cpp
         core/kernel/Arange.h
         core/kernel/Arange.cpp
+        core/kernel/ArangeGPU.cpp
         core/kernel/ArangeCPU.cpp
         core/kernel/BinaryEW.h
         core/kernel/BinaryEW.cpp
@@ -61,6 +62,7 @@ set(CORE_FILES
         core/kernel/UnaryEW.h
         core/kernel/UnaryEW.cpp
         core/kernel/UnaryEWCPU.cpp
+        core/kernel/UnaryEWGPU.cpp
         # linalg
         core/linalg/AddMM.h
         core/linalg/AddMM.cpp

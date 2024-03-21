@@ -17,11 +17,9 @@ void ArangeCPU(const Tensor& start,
                const Tensor& step,
                Tensor& dst);
 
-#ifdef BUILD_CUDA_MODULE
-void ArangeCUDA(const Tensor& start,
-                const Tensor& stop,
-                const Tensor& step,
-                Tensor& dst);
-#endif
+void ArangeGPU(const Tensor& start,
+               const Tensor& stop,
+               const Tensor& step,
+               Tensor& dst);
 
 }  // namespace u3d::core::kernel

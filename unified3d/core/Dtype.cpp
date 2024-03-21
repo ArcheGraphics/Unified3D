@@ -24,7 +24,6 @@ static_assert(sizeof(bool    ) == 1, "Unsupported platform: bool must be 1 byte.
 
 const Dtype Dtype::Undefined(Dtype::DtypeCode::Undefined, 1, "Undefined");
 const Dtype Dtype::Float32  (Dtype::DtypeCode::Float,     4, "Float32"  );
-const Dtype Dtype::Float64  (Dtype::DtypeCode::Float,     8, "Float64"  );
 const Dtype Dtype::Int8     (Dtype::DtypeCode::Int,       1, "Int8"     );
 const Dtype Dtype::Int16    (Dtype::DtypeCode::Int,       2, "Int16"    );
 const Dtype Dtype::Int32    (Dtype::DtypeCode::Int,       4, "Int32"    );
@@ -38,7 +37,6 @@ const Dtype Dtype::Bool     (Dtype::DtypeCode::Bool,      1, "Bool"     );
 
 const Dtype Undefined = Dtype::Undefined;
 const Dtype Float32 = Dtype::Float32;
-const Dtype Float64 = Dtype::Float64;
 const Dtype Int8 = Dtype::Int8;
 const Dtype Int16 = Dtype::Int16;
 const Dtype Int32 = Dtype::Int32;

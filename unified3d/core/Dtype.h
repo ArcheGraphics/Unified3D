@@ -19,7 +19,6 @@ class UNIFIED3D_API Dtype {
 public:
     static const Dtype Undefined;
     static const Dtype Float32;
-    static const Dtype Float64;
     static const Dtype Int8;
     static const Dtype Int16;
     static const Dtype Int32;
@@ -77,7 +76,6 @@ private:
 
 UNIFIED3D_API extern const Dtype Undefined;
 UNIFIED3D_API extern const Dtype Float32;
-UNIFIED3D_API extern const Dtype Float64;
 UNIFIED3D_API extern const Dtype Int8;
 UNIFIED3D_API extern const Dtype Int16;
 UNIFIED3D_API extern const Dtype Int32;
@@ -91,11 +89,6 @@ UNIFIED3D_API extern const Dtype Bool;
 template <>
 inline Dtype Dtype::FromType<float>() {
     return Dtype::Float32;
-}
-
-template <>
-inline Dtype Dtype::FromType<double>() {
-    return Dtype::Float64;
 }
 
 template <>

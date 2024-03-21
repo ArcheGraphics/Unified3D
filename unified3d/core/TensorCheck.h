@@ -26,8 +26,8 @@
 /// occurs, the corresponding file name, line number and function name will be
 /// printed in the error message.
 ///
-/// Example: check that the tensor has dtype Float32 or Float64
-/// core::AssertTensorDtypes(tensor, {core::Float32, core::Float64});
+/// Example: check that the tensor has dtype Float32
+/// core::AssertTensorDtypes(tensor, {core::Float32});
 #define AssertTensorDtypes(tensor, ...)                                       \
     tensor_check::AssertTensorDtypes_(                                        \
             __FILE__, __LINE__, static_cast<const char*>(UNIFIED3D_FUNCTION), \

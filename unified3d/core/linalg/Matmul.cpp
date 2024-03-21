@@ -18,7 +18,7 @@ void Matmul(const Tensor& A, const Tensor& B, Tensor& output) {
     const Dtype dtype_original = A.GetDtype();
     Dtype dtype;
 
-    if (dtype_original != core::Float32 && dtype_original != core::Float64) {
+    if (dtype_original != core::Float32) {
         utility::LogDebug("Converting to Float32 dtype to from {}.",
                           dtype_original.ToString());
         dtype = core::Float32;

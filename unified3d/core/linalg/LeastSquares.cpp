@@ -11,7 +11,7 @@
 namespace u3d::core {
 
 void LeastSquares(const Tensor &A, const Tensor &B, Tensor &X) {
-    AssertTensorDtypes(A, {Float32, Float64});
+    AssertTensorDtypes(A, {Float32});
     AssertTensorDevice(B, A.GetDevice());
     AssertTensorDtype(B, A.GetDtype());
 

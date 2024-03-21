@@ -30,11 +30,7 @@ void UnaryEW(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
     if (src_device.IsCPU()) {
         UnaryEWCPU(src, dst, op_code);
     } else if (src_device.IsGPU()) {
-#ifdef BUILD_CUDA_MODULE
-        UnaryEWCUDA(src, dst, op_code);
-#else
-        utility::LogError("Not compiled with CUDA, but CUDA device is used.");
-#endif
+        UnaryEWGPU(src, dst, op_code);
     } else {
         utility::LogError("UnaryEW Unimplemented device");
     }
@@ -57,11 +53,7 @@ void Copy(const Tensor& src, Tensor& dst) {
     if (src_device.IsCPU() && dst_device.IsCPU()) {
         CopyCPU(src, dst);
     } else {
-#ifdef BUILD_CUDA_MODULE
-        CopyCUDA(src, dst);
-#else
-        utility::LogError("Not compiled with CUDA, but CUDA device is used.");
-#endif
+        CopyGPU(src, dst);
     }
 }
 

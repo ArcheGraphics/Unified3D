@@ -177,7 +177,7 @@ void CopyCPU(const Tensor& src, Tensor& dst) {
 
         DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(dst_dtype, [&]() {
             auto scalar_element = src.To(dst_dtype).Item<scalar_t>();
-            scalar_t* dst_ptr =
+            auto* dst_ptr =
                     static_cast<scalar_t*>(dst.GetDataView().CpuAddress());
             parallelFor(int64_t(0), num_elements, [&](int64_t workload_idx) {
                 dst_ptr[workload_idx] = scalar_element;
@@ -210,9 +210,9 @@ void UnaryEWCPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
     Dtype dst_dtype = dst.GetDtype();
 
     auto assert_dtype_is_float = [](Dtype dtype) -> void {
-        if (dtype != core::Float32 && dtype != core::Float64) {
+        if (dtype != core::Float32) {
             utility::LogError(
-                    "Only supports Float32 and Float64, but {} is used.",
+                    "Only supports Float32, but {} is used.",
                     dtype.ToString());
         }
     };

@@ -172,7 +172,7 @@ Tensor::ConstIterator Tensor::cend() const {
 }
 
 // Equivalent to `Tensor& operator=(const Tensor& other) & = default;`.
-// Manual implentaiton is need to avoid MSVC bug (error C2580:  multiple
+// Manual implementation is need to avoid MSVC bug (error C2580:  multiple
 // versions of a defaulted special member functions are not allowed.)
 Tensor& Tensor::operator=(const Tensor& other) & {
     shape_ = other.shape_;
@@ -184,7 +184,7 @@ Tensor& Tensor::operator=(const Tensor& other) & {
 }
 
 // Equivalent to `Tensor& operator=(Tensor&& other) & = default;`.
-// Manual implentaiton is need to avoid MSVC bug (error C2580:  multiple
+// Manual implementation is need to avoid MSVC bug (error C2580:  multiple
 // versions of a defaulted special member functions are not allowed.)
 Tensor& Tensor::operator=(Tensor&& other) & noexcept {
     shape_ = other.shape_;
@@ -556,7 +556,7 @@ Tensor Tensor::View(const SizeVector& dst_shape) const {
     } else {
         utility::LogError(
                 "View shape {} is not compatible with Tensor's size {} and "
-                "sride {}, at least one dimension spacs across two contiguous "
+                "stride {}, at least one dimension spacs across two contiguous "
                 "subspaces. Use Reshape() instead.",
                 dst_shape, shape_, strides_);
     }
@@ -917,7 +917,7 @@ Tensor Tensor::T() const {
 }
 
 double Tensor::Det() const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
     return core::Det(*this);
 }
 
@@ -1072,7 +1072,7 @@ Tensor Tensor::Sum(const SizeVector& dims, bool keepdim) const {
 }
 
 Tensor Tensor::Mean(const SizeVector& dims, bool keepdim) const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
 
     // Following Numpy's semantics, reduction on 0-sized Tensor will result in
     // NaNs and a warning. A straightforward method is used now. Later it can be
@@ -1187,7 +1187,7 @@ Tensor Tensor::Abs_() {
 }
 
 Tensor Tensor::IsNan() const {
-    if (dtype_ == core::Float32 || dtype_ == core::Float64) {
+    if (dtype_ == core::Float32) {
         Tensor dst_tensor(shape_, core::Bool, GetDevice());
         kernel::UnaryEW(*this, dst_tensor, kernel::UnaryEWOpCode::IsNan);
         return dst_tensor;
@@ -1197,7 +1197,7 @@ Tensor Tensor::IsNan() const {
 }
 
 Tensor Tensor::IsInf() const {
-    if (dtype_ == core::Float32 || dtype_ == core::Float64) {
+    if (dtype_ == core::Float32) {
         Tensor dst_tensor(shape_, core::Bool, GetDevice());
         kernel::UnaryEW(*this, dst_tensor, kernel::UnaryEWOpCode::IsInf);
         return dst_tensor;
@@ -1207,7 +1207,7 @@ Tensor Tensor::IsInf() const {
 }
 
 Tensor Tensor::IsFinite() const {
-    if (dtype_ == core::Float32 || dtype_ == core::Float64) {
+    if (dtype_ == core::Float32) {
         Tensor dst_tensor(shape_, core::Bool, GetDevice());
         kernel::UnaryEW(*this, dst_tensor, kernel::UnaryEWOpCode::IsFinite);
         return dst_tensor;
@@ -1648,18 +1648,18 @@ bool Tensor::AllEqual(const Tensor& other) const {
     return (*this == other).All().Item<bool>();
 }
 
-bool Tensor::AllClose(const Tensor& other, double rtol, double atol) const {
+bool Tensor::AllClose(const Tensor& other, float rtol, float atol) const {
     // TODO: support nan;
     return IsClose(other, rtol, atol).All().Item<bool>();
 }
 
-Tensor Tensor::IsClose(const Tensor& other, double rtol, double atol) const {
+Tensor Tensor::IsClose(const Tensor& other, float rtol, float atol) const {
     AssertTensorDevice(other, GetDevice());
     AssertTensorDtype(other, GetDtype());
     AssertTensorShape(other, GetShape());
 
-    Tensor lhs = this->To(core::Float64);
-    Tensor rhs = other.To(core::Float64);
+    Tensor lhs = this->To(core::Float32);
+    Tensor rhs = other.To(core::Float32);
     Tensor actual_error = (lhs - rhs).Abs();
     Tensor max_error = atol + rtol * rhs.Abs();
     return actual_error <= max_error;
@@ -1682,7 +1682,7 @@ Tensor Tensor::Matmul(const Tensor& rhs) const {
 }
 
 Tensor Tensor::Solve(const Tensor& rhs) const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
     AssertTensorDevice(rhs, GetDevice());
     AssertTensorDtype(rhs, GetDtype());
 
@@ -1692,7 +1692,7 @@ Tensor Tensor::Solve(const Tensor& rhs) const {
 }
 
 Tensor Tensor::LeastSquares(const Tensor& rhs) const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
     AssertTensorDevice(rhs, GetDevice());
     AssertTensorDtype(rhs, GetDtype());
 
@@ -1702,7 +1702,7 @@ Tensor Tensor::LeastSquares(const Tensor& rhs) const {
 }
 
 std::tuple<Tensor, Tensor, Tensor> Tensor::LU(const bool permute_l) const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
 
     core::Tensor permutation, lower, upper;
     core::LU(*this, permutation, lower, upper, permute_l);
@@ -1710,7 +1710,7 @@ std::tuple<Tensor, Tensor, Tensor> Tensor::LU(const bool permute_l) const {
 }
 
 std::tuple<Tensor, Tensor> Tensor::LUIpiv() const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
 
     core::Tensor ipiv, output;
     core::LUIpiv(*this, ipiv, output);
@@ -1736,7 +1736,7 @@ std::tuple<Tensor, Tensor> Tensor::Triul(const int diagonal) const {
 }
 
 Tensor Tensor::Inverse() const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
 
     Tensor output;
     core::Inverse(*this, output);
@@ -1744,7 +1744,7 @@ Tensor Tensor::Inverse() const {
 }
 
 std::tuple<Tensor, Tensor, Tensor> Tensor::SVD() const {
-    AssertTensorDtypes(*this, {Float32, Float64});
+    AssertTensorDtypes(*this, {Float32});
 
     Tensor U, S, VT;
     core::SVD(*this, U, S, VT);

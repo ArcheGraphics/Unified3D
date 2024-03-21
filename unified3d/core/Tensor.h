@@ -964,8 +964,8 @@ public:
     /// \param rtol Relative tolerance.
     /// \param atol Absolute tolerance.
     [[nodiscard]] bool AllClose(const Tensor& other,
-                                double rtol = 1e-5,
-                                double atol = 1e-8) const;
+                                float rtol = 1e-5,
+                                float atol = 1e-8) const;
 
     /// Element-wise version of Tensor::AllClose().
     ///
@@ -986,8 +986,8 @@ public:
     /// \param atol Absolute tolerance.
     /// \return A boolean tensor indicating where the tensor is close.
     [[nodiscard]] Tensor IsClose(const Tensor& other,
-                                 double rtol = 1e-5,
-                                 double atol = 1e-8) const;
+                                 float rtol = 1e-5,
+                                 float atol = 1e-8) const;
 
     /// Returns true iff the tensor is the other tensor. This means that, the
     /// two tensors have the same underlying memory, device, dtype, shape,

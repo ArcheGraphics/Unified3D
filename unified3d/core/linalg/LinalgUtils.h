@@ -21,9 +21,6 @@ namespace u3d::core {
         if (DTYPE == u3d::core::Float32) {               \
             using scalar_t = float;                      \
             return __VA_ARGS__();                        \
-        } else if (DTYPE == u3d::core::Float64) {        \
-            using scalar_t = double;                     \
-            return __VA_ARGS__();                        \
         } else {                                         \
             utility::LogError("Unsupported data type."); \
         }                                                \
