@@ -73,7 +73,6 @@
         if (DTYPE == u3d::core::Float32) {                    \
             using scalar_t = float;                           \
             return __VA_ARGS__();                             \
-            \                                                 \
         } else {                                              \
             u3d::utility::LogError("Unsupported data type."); \
         }                                                     \

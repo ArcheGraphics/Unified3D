@@ -14,6 +14,7 @@
 #include "unified3d/core/Tensor.h"
 #include "unified3d/utility/Logging.h"
 #include "unified3d/utility/MiniVec.h"
+#include "unified3d/metal/kernels/Indexer.h"
 
 namespace u3d::core {
 
@@ -21,28 +22,17 @@ class Indexer;
 
 class IndexerIterator;
 
-// Maximum number of dimensions of TensorRef.
-static constexpr int64_t MAX_DIMS = 10;
-
-// Maximum number of inputs of an op.
-// MAX_INPUTS shall be >= MAX_DIMS to support advanced indexing.
-static constexpr int64_t MAX_INPUTS = 10;
-
-// Maximum number of outputs of an op. This number can be increased when
-// necessary.
-static constexpr int64_t MAX_OUTPUTS = 2;
-
 template <int NARGS, typename index_t = uint32_t>
 struct OffsetCalculator {
     OffsetCalculator(int dims,
                      const int64_t* sizes,
                      const int64_t* const* strides)
         : dims_(dims) {
-        if (dims_ > MAX_DIMS) {
-            utility::LogError("tensor has too many (>{}) dims_", MAX_DIMS);
+        if (dims_ > u3d::metal::MAX_DIMS) {
+            utility::LogError("tensor has too many (>{}) dims_", u3d::metal::MAX_DIMS);
         }
 
-        for (int i = 0; i < MAX_DIMS; ++i) {
+        for (int i = 0; i < u3d::metal::MAX_DIMS; ++i) {
             if (i < dims_) {
                 sizes_[i] = sizes[i];
             } else {
@@ -60,7 +50,7 @@ struct OffsetCalculator {
             offsets[arg] = 0;
         }
 
-        for (int dim = 0; dim < MAX_DIMS; ++dim) {
+        for (int dim = 0; dim < u3d::metal::MAX_DIMS; ++dim) {
             if (dim == dims_) {
                 break;
             }
@@ -75,8 +65,8 @@ struct OffsetCalculator {
     }
 
     int dims_;
-    index_t sizes_[MAX_DIMS];
-    index_t strides_[MAX_DIMS][NARGS];
+    index_t sizes_[u3d::metal::MAX_DIMS];
+    index_t strides_[u3d::metal::MAX_DIMS][NARGS];
 };
 
 /// A minimalistic class that reference a Tensor.
@@ -87,9 +77,9 @@ struct TensorRef {
     TensorRef() : data_view_(nullptr), ndims_(0), dtype_byte_size_(0) {}
 
     TensorRef(const Tensor& t) {
-        if (t.NumDims() > MAX_DIMS) {
+        if (t.NumDims() > u3d::metal::MAX_DIMS) {
             utility::LogError("Tenor has too many dimensions {} > {}.",
-                              t.NumDims(), MAX_DIMS);
+                              t.NumDims(), u3d::metal::MAX_DIMS);
         }
         data_view_ = t.GetDataView();
         ndims_ = t.NumDims();
@@ -162,11 +152,13 @@ struct TensorRef {
 
     bool operator!=(const TensorRef& other) const { return !(*this == other); }
 
+    [[nodiscard]] u3d::metal::TensorRef GpuView() const;
+
     metal::Buffer data_view_;
     int64_t ndims_ = 0;
     int64_t dtype_byte_size_ = 0;
-    int64_t shape_[MAX_DIMS]{};
-    int64_t byte_strides_[MAX_DIMS]{};
+    int64_t shape_[u3d::metal::MAX_DIMS]{};
+    int64_t byte_strides_[u3d::metal::MAX_DIMS]{};
 };
 
 enum class DtypePolicy {
@@ -453,6 +445,8 @@ public:
                                       workload_idx);
     }
 
+    [[nodiscard]] u3d::metal::Indexer GpuView() const;
+
 protected:
     /// Merge adjacent dimensions if either dim is 1 or if:
     /// shape[n] * stride[n] == shape[n + 1]
@@ -565,16 +559,16 @@ protected:
     int64_t num_outputs_ = 0;
 
     /// Array of input TensorRefs.
-    TensorRef inputs_[MAX_INPUTS];
+    TensorRef inputs_[u3d::metal::MAX_INPUTS];
 
     /// Array of output TensorRefs.
-    TensorRef outputs_[MAX_OUTPUTS];
+    TensorRef outputs_[u3d::metal::MAX_OUTPUTS];
 
     /// Array of contiguous flags for all input TensorRefs.
-    bool inputs_contiguous_[MAX_INPUTS]{};
+    bool inputs_contiguous_[u3d::metal::MAX_INPUTS]{};
 
     /// Array of contiguous flags for all output TensorRefs.
-    bool outputs_contiguous_[MAX_OUTPUTS]{};
+    bool outputs_contiguous_[u3d::metal::MAX_OUTPUTS]{};
 
     /// Indexer's global shape. The shape's number of elements is the
     /// same as GetNumWorkloads() for the Indexer.
@@ -587,11 +581,11 @@ protected:
     ///   keepdim=true always) with size 1. For each axis, the primary dimension
     ///   is the non-1 dimension (if both are 1, then the primary dimension is 1
     ///   in that axis).
-    int64_t primary_shape_[MAX_DIMS]{};
+    int64_t primary_shape_[u3d::metal::MAX_DIMS]{};
 
     /// The default strides for primary_shape_ for internal use only. Used to
     /// compute the actual strides and ultimately the index offsets.
-    int64_t primary_strides_[MAX_DIMS]{};
+    int64_t primary_strides_[u3d::metal::MAX_DIMS]{};
 
     /// Indexer's global number of dimensions.
     int64_t ndims_ = 0;

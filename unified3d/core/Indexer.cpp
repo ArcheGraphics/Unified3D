@@ -29,18 +29,18 @@ Indexer::Indexer(const std::vector<Tensor>& input_tensors,
     if (num_inputs_ < 1) {
         utility::LogError("Indexer must have at least one input.");
     }
-    if (num_inputs_ > MAX_INPUTS) {
+    if (num_inputs_ > u3d::metal::MAX_INPUTS) {
         utility::LogError(
                 "Indexer cannot have more than {} inputs, but got {}.",
-                MAX_INPUTS, num_inputs_);
+                u3d::metal::MAX_INPUTS, num_inputs_);
     }
     if (num_outputs_ < 1) {
         utility::LogError("Indexer must have at least one input.");
     }
-    if (num_outputs_ > MAX_OUTPUTS) {
+    if (num_outputs_ > u3d::metal::MAX_OUTPUTS) {
         utility::LogError(
                 "Indexer cannot have more than {} outputs, but got {}.",
-                MAX_OUTPUTS, num_outputs_);
+                u3d::metal::MAX_OUTPUTS, num_outputs_);
     }
 
     // Check DtypePolicy.
@@ -281,9 +281,9 @@ Indexer Indexer::GetPerOutputIndexer(int64_t output_idx) const {
     //       output_idx = 3 -> inputs (*, 1, 1) -> offset_indices (0, 1, 1)
     //       output_idx = 4 -> inputs (*, 2, 0) -> offset_indices (0, 2, 0)
     //       output_idx = 5 -> inputs (*, 2, 1) -> offset_indices (0, 2, 1)
-    int64_t output_shape[MAX_DIMS] = {0};
-    int64_t output_default_strides[MAX_DIMS] = {0};
-    int64_t offset_indices[MAX_DIMS] = {0};
+    int64_t output_shape[u3d::metal::MAX_DIMS] = {0};
+    int64_t output_default_strides[u3d::metal::MAX_DIMS] = {0};
+    int64_t offset_indices[u3d::metal::MAX_DIMS] = {0};
 
     for (int64_t i = 0; i < ndims_; ++i) {
         if (IsReductionDim(i)) {
@@ -584,6 +584,41 @@ void Indexer::ReductionRestride(TensorRef& dst,
             dst.byte_strides_[i] = 0;
         }
     }
+}
+
+u3d::metal::TensorRef TensorRef::GpuView() const {
+    u3d::metal::TensorRef tensor;
+    tensor.data_ptr_ = (char*)data_view_.GpuAddress();
+    tensor.dtype_byte_size_ = dtype_byte_size_;
+    for (int i = 0; i < u3d::metal::MAX_DIMS; ++i) {
+        tensor.shape_[i] = shape_[i];
+    }
+    for (int i = 0; i < u3d::metal::MAX_DIMS; ++i) {
+        tensor.byte_strides_[i] = byte_strides_[i];
+    }
+    return tensor;
+}
+
+u3d::metal::Indexer Indexer::GpuView() const {
+    u3d::metal::Indexer indexer;
+    indexer.ndims_ = ndims_;
+    indexer.num_inputs_ = num_inputs_;
+    for (int i = 0; i < u3d::metal::MAX_INPUTS; ++i) {
+        indexer.inputs_contiguous_[i] = inputs_contiguous_[i];
+    }
+    for (int i = 0; i < u3d::metal::MAX_OUTPUTS; ++i) {
+        indexer.outputs_contiguous_[i] = outputs_contiguous_[i];
+    }
+    for (int i = 0; i < u3d::metal::MAX_DIMS; ++i) {
+        indexer.primary_strides_[i] = primary_strides_[i];
+    }
+    for (int i = 0; i < u3d::metal::MAX_INPUTS; ++i) {
+        indexer.inputs_[i] = inputs_[i].GpuView();
+    }
+    for (int i = 0; i < u3d::metal::MAX_OUTPUTS; ++i) {
+        indexer.outputs_[i] = outputs_[i].GpuView();
+    }
+    return indexer;
 }
 
 IndexerIterator::IndexerIterator(const Indexer& indexer) : indexer_(indexer) {}

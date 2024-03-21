@@ -137,7 +137,6 @@ static char DtypeToChar(const core::Dtype& dtype) {
     //      std::complex<long double>)
     // '?': object
     if (dtype == core::Float32) return 'f';
-    if (dtype == core::Float64) return 'f';
     if (dtype == core::Int8) return 'i';
     if (dtype == core::Int16) return 'i';
     if (dtype == core::Int32) return 'i';
@@ -521,7 +520,6 @@ public:
 
     [[nodiscard]] core::Dtype GetDtype() const {
         if (type_ == 'f' && word_size_ == 4) return core::Float32;
-        if (type_ == 'f' && word_size_ == 8) return core::Float64;
         if (type_ == 'i' && word_size_ == 1) return core::Int8;
         if (type_ == 'i' && word_size_ == 2) return core::Int16;
         if (type_ == 'i' && word_size_ == 4) return core::Int32;

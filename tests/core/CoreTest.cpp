@@ -19,7 +19,7 @@ std::vector<core::Dtype> PermuteDtypesWithBool::TestCases() {
     return {
             core::Bool,  core::UInt8,   core::Int8,    core::UInt16,
             core::Int16, core::UInt32,  core::Int32,   core::UInt64,
-            core::Int64, core::Float32, core::Float64,
+            core::Int64, core::Float32,
     };
 }
 

@@ -128,12 +128,12 @@ TEST_P(TensorPermuteDevices, WithInitList) {
     EXPECT_EQ(t.ToFlatVector<int>(), std::vector<int>({1, 2, 3, 4, 5, 6}));
 
     // 3-D tensor initialization with list.
-    t = core::Tensor::Init<double>({{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}},
+    t = core::Tensor::Init<float>({{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}},
                                    device);
     EXPECT_EQ(t.GetShape(), core::SizeVector({2, 2, 2}));
-    EXPECT_EQ(t.GetDtype(), core::Float64);
-    EXPECT_EQ(t.ToFlatVector<double>(),
-              std::vector<double>({1, 2, 3, 4, 5, 6, 7, 8}));
+    EXPECT_EQ(t.GetDtype(), core::Float32);
+    EXPECT_EQ(t.ToFlatVector<float>(),
+              std::vector<float>({1, 2, 3, 4, 5, 6, 7, 8}));
 
     // Test boolean datatype.
     t = core::Tensor::Init<bool>({{true, false}, {false, true}}, device);
@@ -155,10 +155,10 @@ TEST_P(TensorPermuteDevices, WithInitList) {
                  std::runtime_error);
 
     // Test shapes with 0-element.
-    t = core::Tensor::Init<double>({}, device);
+    t = core::Tensor::Init<float>({}, device);
     EXPECT_EQ(t.GetShape(), core::SizeVector({0}));
-    EXPECT_EQ(t.GetDtype(), core::Float64);
-    EXPECT_EQ(t.ToFlatVector<double>(), std::vector<double>({}));
+    EXPECT_EQ(t.GetDtype(), core::Float32);
+    EXPECT_EQ(t.ToFlatVector<float>(), std::vector<float>({}));
 
     t = core::Tensor::Init<bool>({{}, {}});
     EXPECT_EQ(t.GetShape(), core::SizeVector({2, 0}));
@@ -1076,7 +1076,7 @@ TEST_P(TensorPermuteDevices, Append) {
     // Taking the above case of [1, 2] to [2, 2] with different dtype and
     // device.
     EXPECT_ANY_THROW(
-            EIGEN_UNUSED_VARIABLE(self.Append(other.To(core::Float64))));
+            EIGEN_UNUSED_VARIABLE(self.Append(other.To(core::Float32))));
     if (device.IsGPU()) {
         EXPECT_ANY_THROW(EIGEN_UNUSED_VARIABLE(
                 self.Append(other.To(core::Device("CPU:0")))));

@@ -206,8 +206,8 @@ protected:
     AdvancedIndexerMode mode_;
     int64_t num_indices_;
     int64_t element_byte_size_;
-    int64_t indexed_shape_[MAX_DIMS]{};
-    int64_t indexed_strides_[MAX_DIMS]{};
+    int64_t indexed_shape_[u3d::metal::MAX_DIMS]{};
+    int64_t indexed_strides_[u3d::metal::MAX_DIMS]{};
 };
 
 }  // namespace u3d::core
