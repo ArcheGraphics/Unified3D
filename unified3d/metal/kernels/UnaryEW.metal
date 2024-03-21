@@ -43,6 +43,32 @@ void LaunchUnaryEWKernel(device u3d::metal::Indexer& indexer,
 }
 
 //--------------------------------------------------------------------------------------------
+template <typename scalar_t>
+[[kernel]] void CopySingleKernel(device scalar_t* dst_ptr,
+                                 constant scalar_t& scalar_element,
+                                 uint index [[thread_position_in_grid]]) {
+    dst_ptr[index] = scalar_element;
+}
+
+#define instantiate_CopySingleKernel(tname, type) \
+template [[host_name("CopySingleKernel" #tname)]] \
+[[kernel]] void CopySingleKernel<type>(\
+device type* dst_ptr, \
+constant type& scalar_element, \
+uint index [[thread_position_in_grid]]);
+
+instantiate_CopySingleKernel(uint8, uint8_t)
+instantiate_CopySingleKernel(uint16, uint16_t)
+instantiate_CopySingleKernel(uint32, uint32_t)
+instantiate_CopySingleKernel(uint64, uint64_t)
+instantiate_CopySingleKernel(int8, int8_t)
+instantiate_CopySingleKernel(int16, int16_t)
+instantiate_CopySingleKernel(int32, int32_t)
+instantiate_CopySingleKernel(int64, int64_t)
+instantiate_CopySingleKernel(float16, half)
+instantiate_CopySingleKernel(float32, float)
+
+//--------------------------------------------------------------------------------------------
 template <typename src_t, typename dst_t>
 [[kernel]] void CopyElementKernel(device u3d::metal::Indexer& indexer,
                                   uint index [[thread_position_in_grid]]) {

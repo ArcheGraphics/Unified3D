@@ -32,14 +32,14 @@ public:
     [[nodiscard]] const MTL::Buffer* Ptr() const { return ptr_; };
     MTL::Buffer* Ptr() { return ptr_; };
 
+    [[nodiscard]] uint64_t Offset() const { return offset_; }
+
     [[nodiscard]] Buffer view(uint64_t offset) const;
 
-    bool operator==(const Buffer &other) const;
+    bool operator==(const Buffer& other) const;
 
-    bool operator!=(const Buffer &other) const;
+    bool operator!=(const Buffer& other) const;
 };
-
-
 
 namespace {
 

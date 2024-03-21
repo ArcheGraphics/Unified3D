@@ -28,6 +28,10 @@ public:
                             const metal::Buffer& src_ptr,
                             size_t num_bytes);
 
+    static void MemcpyOnGpu(metal::Buffer& dst_ptr,
+                            const metal::Buffer& src_ptr,
+                            size_t num_bytes);
+
     template <typename T>
     static void MemcpyToHost(T* dst_ptr,
                              const metal::Buffer& src_ptr,

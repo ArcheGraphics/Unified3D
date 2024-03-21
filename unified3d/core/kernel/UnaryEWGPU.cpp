@@ -8,6 +8,8 @@
 #include "unified3d/core/Indexer.h"
 #include "unified3d/core/Tensor.h"
 #include "unified3d/core/kernel/UnaryEW.h"
+#include "unified3d/metal/Device.h"
+#include <Metal/Metal.hpp>
 
 namespace u3d::core::kernel {
 void CopyGPU(const Tensor& src, Tensor& dst) {
@@ -20,15 +22,15 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
 
     Device src_device = src.GetDevice();
     Device dst_device = dst.GetDevice();
+    auto& d = metal::Device::GetInstance();
 
     if (src_device.IsGPU() && dst_device.IsGPU()) {
         if (src.IsContiguous() && dst.IsContiguous() &&
             src.GetShape() == dst.GetShape() && src_dtype == dst_dtype) {
             // MemoryManager handles p2p and non-p2p device copy.
-            //            MemoryManager::Memcpy(dst.GetDataView(), dst_device,
-            //                                  src.GetDataView(), src_device,
-            //                                  src_dtype.ByteSize() *
-            //                                  shape.NumElements());
+            MemoryManager::MemcpyOnGpu(
+                    dst.GetDataView(), src.GetDataView(),
+                    src_dtype.ByteSize() * shape.NumElements());
         } else if (dst.NumElements() > 1 && dst.IsContiguous() &&
                    src.NumElements() == 1 && !src_dtype.IsObject()) {
             int64_t num_elements = dst.NumElements();
@@ -36,27 +38,53 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
             DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(dst_dtype, [&]() {
                 auto scalar_element = src.To(dst_dtype).Item<scalar_t>();
                 auto dst_ptr = dst.GetDataView().GpuAddress();
-                //                ParallelFor(src_device, num_elements,
-                //                            [=](int64_t workload_idx) {
-                //                                dst_ptr[workload_idx] =
-                //                                scalar_element;
-                //                            });
+                {
+                    auto compute_encoder = d.get_command_encoder(0);
+                    auto kernel = d.get_kernel("CopySingleKernel");
+                    compute_encoder->setComputePipelineState(kernel);
+                    compute_encoder->setBytes(&dst_ptr, sizeof(uint64_t), 0);
+                    compute_encoder->setBytes(&scalar_element, sizeof(scalar_t),
+                                              1);
+                    compute_encoder->dispatchThreads(
+                            MTL::Size(num_elements, 1, 1),
+                            MTL::Size(128, 1, 1));
+                }
             });
         } else if (src_device == dst_device) {
             // For more optimized version, one can check if P2P from src to
             // dst is enabled, then put synchronization with streams on both
             // src and dst to wait for copy kernel to complete.
             Indexer indexer({src}, dst, DtypePolicy::NONE);
+            auto compute_encoder = d.get_command_encoder(0);
+
             if (src.GetDtype().IsObject()) {
                 int64_t object_byte_size = src.GetDtype().ByteSize();
-                // MetalCopyObjectElementKernel
+                {
+                    auto kernel = d.get_kernel("MetalCopyObjectElementKernel");
+                    compute_encoder->setComputePipelineState(kernel);
+                    compute_encoder->setBytes(&indexer,
+                                              sizeof(u3d::metal::Indexer), 0);
+                    compute_encoder->setBytes(&object_byte_size,
+                                              sizeof(int64_t), 1);
+                    compute_encoder->dispatchThreads(
+                            MTL::Size(indexer.NumWorkloads(), 1, 1),
+                            MTL::Size(128, 1, 1));
+                }
 
             } else {
                 DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(src_dtype, [&]() {
                     using src_t = scalar_t;
                     DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(dst_dtype, [&]() {
                         using dst_t = scalar_t;
-                        // MetalCopyElementKernel
+                        {
+                            auto kernel = d.get_kernel("CopyElementKernel");
+                            compute_encoder->setComputePipelineState(kernel);
+                            compute_encoder->setBytes(
+                                    &indexer, sizeof(u3d::metal::Indexer), 0);
+                            compute_encoder->dispatchThreads(
+                                    MTL::Size(indexer.NumWorkloads(), 1, 1),
+                                    MTL::Size(128, 1, 1));
+                        }
                     });
                 });
             }
@@ -68,11 +96,9 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
         Tensor src_conti = src.Contiguous();  // No op if already contiguous
         if (dst.IsContiguous() && src.GetShape() == dst.GetShape() &&
             src_dtype == dst_dtype) {
-            //            MemoryManager::Memcpy(dst.GetDataView(), dst_device,
-            //                                  src_conti.GetDataView(),
-            //                                  src_conti.GetDevice(),
-            //                                  src_dtype.ByteSize() *
-            //                                  shape.NumElements());
+            MemoryManager::MemcpyOnCpu(
+                    dst.GetDataView(), src_conti.GetDataView(),
+                    src_dtype.ByteSize() * shape.NumElements());
         } else {
             dst.CopyFrom(src.Contiguous().To(dst_device));
         }
@@ -82,11 +108,20 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
     }
 }
 
+void DispatchUnaryEW(const std::string& name, const Indexer& indexer) {
+    auto& d = metal::Device::GetInstance();
+    auto compute_encoder = d.get_command_encoder(0);
+    auto kernel = d.get_kernel(name);
+    compute_encoder->setComputePipelineState(kernel);
+    compute_encoder->setBytes(&indexer, sizeof(u3d::metal::Indexer), 0);
+    compute_encoder->dispatchThreads(MTL::Size(indexer.NumWorkloads(), 1, 1),
+                                     MTL::Size(128, 1, 1));
+}
+
 void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
     // src and dst have been changed to have the same shape, dtype, device.
     Dtype src_dtype = src.GetDtype();
     Dtype dst_dtype = dst.GetDtype();
-    Device src_device = src.GetDevice();
 
     auto assert_dtype_is_float = [](Dtype dtype) -> void {
         if (dtype != core::Float32) {
@@ -99,11 +134,11 @@ void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
         DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(src_dtype, [&]() {
             if (dst_dtype == src_dtype) {
                 Indexer indexer({src}, dst, DtypePolicy::ALL_SAME);
-                // MetalLogicalNotElementKernel
+                DispatchUnaryEW("LogicalNotElementKernel", indexer);
             } else if (dst_dtype == core::Bool) {
                 Indexer indexer({src}, dst,
                                 DtypePolicy::INPUT_SAME_OUTPUT_BOOL);
-                // MetalLogicalNotElementKernel
+                DispatchUnaryEW("LogicalNotElementKernel", indexer);
             } else {
                 utility::LogError(
                         "Boolean op's output type must be boolean or the "
@@ -117,11 +152,11 @@ void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
         Indexer indexer({src}, dst, DtypePolicy::INPUT_SAME_OUTPUT_BOOL);
         DISPATCH_DTYPE_TO_TEMPLATE(src_dtype, [&]() {
             if (op_code == UnaryEWOpCode::IsNan) {
-                // MetalIsNanElementKernel
+                DispatchUnaryEW("IsNanElementKernel", indexer);
             } else if (op_code == UnaryEWOpCode::IsInf) {
-                // MetalIsInfElementKernel
+                DispatchUnaryEW("IsInfElementKernel", indexer);
             } else if (op_code == UnaryEWOpCode::IsFinite) {
-                // MetalIsFiniteElementKernel
+                DispatchUnaryEW("IsFiniteElementKernel", indexer);
             }
         });
     } else {
@@ -130,38 +165,38 @@ void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
             switch (op_code) {
                 case UnaryEWOpCode::Sqrt:
                     assert_dtype_is_float(src_dtype);
-                    // MetalSqrtElementKernel
+                    DispatchUnaryEW("SqrtElementKernel", indexer);
                     break;
                 case UnaryEWOpCode::Sin:
                     assert_dtype_is_float(src_dtype);
-                    // MetalSinElementKernel
+                    DispatchUnaryEW("SinElementKernel", indexer);
                     break;
                 case UnaryEWOpCode::Cos:
                     assert_dtype_is_float(src_dtype);
-                    // MetalCosElementKernel
+                    DispatchUnaryEW("CosElementKernel", indexer);
                     break;
                 case UnaryEWOpCode::Neg:
-                    // MetalNegElementKernel
+                    DispatchUnaryEW("NegElementKernel", indexer);
                     break;
                 case UnaryEWOpCode::Exp:
                     assert_dtype_is_float(src_dtype);
-                    // MetalExpElementKernel
+                    DispatchUnaryEW("ExpElementKernel", indexer);
                     break;
-                case UnaryEWOpCode::Abs:
-                    // MetalAbsElementKernel
-                    break;
-                case UnaryEWOpCode::Floor:
-                    // MetalFloorElementKernel
-                    break;
-                case UnaryEWOpCode::Ceil:
-                    // MetalCeilElementKernel
-                    break;
-                case UnaryEWOpCode::Round:
-                    // MetalRoundElementKernel
-                    break;
-                case UnaryEWOpCode::Trunc:
-                    // MetalTruncElementKernel
-                    break;
+                case UnaryEWOpCode::Abs: {
+                    DispatchUnaryEW("AbsElementKernel", indexer);
+                } break;
+                case UnaryEWOpCode::Floor: {
+                    DispatchUnaryEW("FloorElementKernel", indexer);
+                } break;
+                case UnaryEWOpCode::Ceil: {
+                    DispatchUnaryEW("CeilElementKernel", indexer);
+                } break;
+                case UnaryEWOpCode::Round: {
+                    DispatchUnaryEW("RoundElementKernel", indexer);
+                } break;
+                case UnaryEWOpCode::Trunc: {
+                    DispatchUnaryEW("TruncElementKernel", indexer);
+                } break;
                 default:
                     utility::LogError("Unimplemented op_code for UnaryEWMetal");
                     break;

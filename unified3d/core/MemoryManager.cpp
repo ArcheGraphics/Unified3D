@@ -5,12 +5,9 @@
 //  property of any third parties.
 
 #include <unified3d/core/MemoryManager.h>
-
-#include <unordered_map>
-#include <mach/vm_page_size.h>
-
 #include <unified3d/metal/Metal.h>
 #include <unified3d/metal/Device.h>
+#include <Metal/Metal.hpp>
 
 namespace u3d::core {
 
@@ -26,6 +23,16 @@ void MemoryManager::MemcpyOnCpu(metal::Buffer& dst_ptr,
                                 const metal::Buffer& src_ptr,
                                 size_t num_bytes) {
     std::memcpy(dst_ptr.CpuAddress(), src_ptr.CpuAddress(), num_bytes);
+}
+
+void MemoryManager::MemcpyOnGpu(metal::Buffer& dst_ptr,
+                                const metal::Buffer& src_ptr,
+                                size_t num_bytes) {
+    auto& d = metal::Device::GetInstance();
+    auto command_buffer = d.get_command_buffer(0);
+    auto blitCommandEncoder = command_buffer->blitCommandEncoder();
+    blitCommandEncoder->copyFromBuffer(src_ptr.Ptr(), src_ptr.Offset(), dst_ptr.Ptr(), dst_ptr.Offset(), num_bytes);
+    blitCommandEncoder->endEncoding();
 }
 
 }  // namespace u3d::core
