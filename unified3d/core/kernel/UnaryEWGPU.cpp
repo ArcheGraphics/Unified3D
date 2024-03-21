@@ -11,8 +11,6 @@
 
 namespace u3d::core::kernel {
 
-// Cannot be a static function since on Windows a function enclosing
-// __host__ __device__ lambda function must have external linkage.
 template <typename func_t>
 void LaunchUnaryEWKernel(const Device& device,
                          const Indexer& indexer,
@@ -34,88 +32,6 @@ void LaunchUnaryEWKernel(const Device& device,
     core::ParallelFor(device, indexer.NumWorkloads(), element_func);
 }
 
-template <typename src_t, typename dst_t>
-static void MetalCopyElementKernel(const src_t* src, dst_t* dst) {
-    *dst = static_cast<dst_t>(src);
-}
-
-static void MetalCopyObjectElementKernel(const char* src_bytes,
-                                         char* dst_bytes,
-                                         int64_t object_byte_size) {
-    for (int i = 0; i < object_byte_size; ++i) {
-        dst_bytes[i] = src_bytes[i];
-    }
-}
-
-template <typename scalar_t>
-static void MetalSqrtElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(sqrt(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalSinElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(sin(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalCosElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(cos(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalNegElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = -*src;
-}
-
-template <typename scalar_t>
-static void MetalExpElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(exp(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalAbsElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(abs(static_cast<double>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalIsNanElementKernel(const scalar_t* src, bool* dst) {
-    *dst = isnan(static_cast<float>(*src));
-}
-
-template <typename scalar_t>
-static void MetalIsInfElementKernel(const scalar_t* src, bool* dst) {
-    *dst = isinf(static_cast<float>(*src));
-}
-
-template <typename scalar_t>
-static void MetalIsFiniteElementKernel(const scalar_t* src, bool* dst) {
-    *dst = isfinite(static_cast<float>(*src));
-}
-
-template <typename scalar_t>
-static void MetalFloorElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(floor(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalCeilElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(ceil(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalRoundElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(round(static_cast<float>(*src)));
-}
-
-template <typename scalar_t>
-static void MetalTruncElementKernel(const scalar_t* src, scalar_t* dst) {
-    *dst = static_cast<scalar_t>(trunc(static_cast<float>(*src)));
-}
-
-template <typename src_t, typename dst_t>
-static void MetalLogicalNotElementKernel(const src_t* src, dst_t* dst) {
-    *dst = static_cast<dst_t>(!static_cast<bool>(*src));
-}
 
 void CopyMetal(const Tensor& src, Tensor& dst) {
     // It has been checked that

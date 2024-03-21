@@ -1,0 +1,171 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04EEE5EF2BABDAC800270A03 /* UnaryEW.metal in Sources */ = {isa = PBXBuildFile; fileRef = 04EEE5EE2BABDAC800270A03 /* UnaryEW.metal */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		04EEE5EB2BABDAC800270A03 /* kernels.metallib */ = {isa = PBXFileReference; explicitFileType = "archive.metal-library"; includeInIndex = 0; path = kernels.metallib; sourceTree = BUILT_PRODUCTS_DIR; };
+		04EEE5EE2BABDAC800270A03 /* UnaryEW.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = UnaryEW.metal; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		04EEE5E42BABDAC800270A03 = {
+			isa = PBXGroup;
+			children = (
+				04EEE5ED2BABDAC800270A03 /* kernels */,
+				04EEE5EC2BABDAC800270A03 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		04EEE5EC2BABDAC800270A03 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				04EEE5EB2BABDAC800270A03 /* kernels.metallib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		04EEE5ED2BABDAC800270A03 /* kernels */ = {
+			isa = PBXGroup;
+			children = (
+				04EEE5EE2BABDAC800270A03 /* UnaryEW.metal */,
+			);
+			path = kernels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		04EEE5EA2BABDAC800270A03 /* kernels */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04EEE5F22BABDAC800270A03 /* Build configuration list for PBXNativeTarget "kernels" */;
+			buildPhases = (
+				04EEE5E92BABDAC800270A03 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = kernels;
+			productName = kernels;
+			productReference = 04EEE5EB2BABDAC800270A03 /* kernels.metallib */;
+			productType = "com.apple.product-type.metal-library";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		04EEE5E52BABDAC800270A03 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					04EEE5EA2BABDAC800270A03 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+				};
+			};
+			buildConfigurationList = 04EEE5E82BABDAC800270A03 /* Build configuration list for PBXProject "kernels" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 04EEE5E42BABDAC800270A03;
+			productRefGroup = 04EEE5EC2BABDAC800270A03 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				04EEE5EA2BABDAC800270A03 /* kernels */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		04EEE5E92BABDAC800270A03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04EEE5EF2BABDAC800270A03 /* UnaryEW.metal in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		04EEE5F02BABDAC800270A03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		04EEE5F12BABDAC800270A03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		04EEE5F32BABDAC800270A03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4SL5L673UU;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Debug;
+		};
+		04EEE5F42BABDAC800270A03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4SL5L673UU;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		04EEE5E82BABDAC800270A03 /* Build configuration list for PBXProject "kernels" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04EEE5F02BABDAC800270A03 /* Debug */,
+				04EEE5F12BABDAC800270A03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		04EEE5F22BABDAC800270A03 /* Build configuration list for PBXNativeTarget "kernels" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04EEE5F32BABDAC800270A03 /* Debug */,
+				04EEE5F42BABDAC800270A03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 04EEE5E52BABDAC800270A03 /* Project object */;
+}
