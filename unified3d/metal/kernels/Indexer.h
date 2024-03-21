@@ -65,7 +65,7 @@ struct OffsetCalculator {
 
 /// A minimalistic class that reference a Tensor.
 struct TensorRef {
-    DEVICE_CALLABLE char* data_ptr_{};
+    DEVICE_CALLABLE void* data_ptr_{};
     int64_t dtype_byte_size_ = 0;
     int64_t shape_[MAX_DIMS]{};
     int64_t byte_strides_[MAX_DIMS]{};
@@ -95,7 +95,7 @@ public:
         return num_workloads;
     }
 
-    device char* GetPtr(int64_t workload_idx) thread const {
+    device void* GetPtr(int64_t workload_idx) thread const {
         if (workload_idx < 0 || workload_idx >= NumWorkloads()) {
             return nullptr;
         }
@@ -106,7 +106,7 @@ public:
                       input_.byte_strides_[i];
             workload_idx = workload_idx % input_.byte_strides_[i];
         }
-        return input_.data_ptr_ + offset;
+        return static_cast<device void*>(static_cast<device char*>(input_.data_ptr_) + offset);
     }
 
 protected:
@@ -255,8 +255,7 @@ protected:
                           tr.byte_strides_[i];
                 workload_idx = workload_idx % primary_strides_[i];
             }
-            return static_cast<device T*>(
-                    static_cast<device void*>(tr.data_ptr_ + offset));
+            return static_cast<device T*>(static_cast<device void*>(static_cast<device char*>(tr.data_ptr_) + offset));
         }
     }
 #endif
