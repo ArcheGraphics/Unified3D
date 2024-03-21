@@ -15,9 +15,9 @@ namespace u3d::core {
 void TriuCPU(const Tensor &A, Tensor &output, const int diagonal) {
     DISPATCH_DTYPE_TO_TEMPLATE(A.GetDtype(), [&]() {
         const auto *A_ptr =
-                static_cast<const scalar_t *>(A.GetDataPtr()->CpuAddress());
+                static_cast<const scalar_t *>(A.GetDataView().CpuAddress());
         auto *output_ptr =
-                static_cast<scalar_t *>(output.GetDataPtr()->CpuAddress());
+                static_cast<scalar_t *>(output.GetDataView().CpuAddress());
         int cols = A.GetShape()[1];
         int n = A.GetShape()[0] * cols;
 
@@ -34,9 +34,9 @@ void TriuCPU(const Tensor &A, Tensor &output, const int diagonal) {
 void TrilCPU(const Tensor &A, Tensor &output, const int diagonal) {
     DISPATCH_DTYPE_TO_TEMPLATE(A.GetDtype(), [&]() {
         const auto *A_ptr =
-                static_cast<const scalar_t *>(A.GetDataPtr()->CpuAddress());
+                static_cast<const scalar_t *>(A.GetDataView().CpuAddress());
         auto *output_ptr =
-                static_cast<scalar_t *>(output.GetDataPtr()->CpuAddress());
+                static_cast<scalar_t *>(output.GetDataView().CpuAddress());
         int cols = A.GetShape()[1];
         int n = A.GetShape()[0] * cols;
 
@@ -56,11 +56,11 @@ void TriulCPU(const Tensor &A,
               const int diagonal) {
     DISPATCH_DTYPE_TO_TEMPLATE(A.GetDtype(), [&]() {
         const auto *A_ptr =
-                static_cast<const scalar_t *>(A.GetDataPtr()->CpuAddress());
+                static_cast<const scalar_t *>(A.GetDataView().CpuAddress());
         auto *upper_ptr =
-                static_cast<scalar_t *>(upper.GetDataPtr()->CpuAddress());
+                static_cast<scalar_t *>(upper.GetDataView().CpuAddress());
         auto *lower_ptr =
-                static_cast<scalar_t *>(lower.GetDataPtr()->CpuAddress());
+                static_cast<scalar_t *>(lower.GetDataView().CpuAddress());
         int cols = A.GetShape()[1];
         int n = A.GetShape()[0] * cols;
 

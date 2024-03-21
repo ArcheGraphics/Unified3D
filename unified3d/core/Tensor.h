@@ -40,7 +40,7 @@ public:
           dtype_(dtype),
           blob_(std::make_shared<Blob>(shape.NumElements() * dtype.ByteSize(),
                                        device)) {
-        data_ptr_ = blob_->GetDataPtr();
+        data_view_ = blob_->GetDataView();
     }
 
     /// Constructor for creating a contiguous Tensor with initial values
@@ -65,7 +65,7 @@ public:
         }
 
         // Copy data to blob
-        MemoryManager::MemcpyFromHost(*blob_->GetDataPtr(), init_vals.data(),
+        MemoryManager::MemcpyFromHost(blob_->GetDataView(), init_vals.data(),
                                       init_vals.size() * dtype.ByteSize());
     }
 
@@ -80,7 +80,7 @@ public:
         AssertTemplateDtype<T>();
 
         // Copy data to blob
-        MemoryManager::MemcpyFromHost(blob_->GetDataPtr(), init_vals,
+        MemoryManager::MemcpyFromHost(blob_->GetDataView(), init_vals,
                                       shape_.NumElements() * dtype.ByteSize());
     }
 
@@ -89,12 +89,12 @@ public:
     /// elsewhere. See Blob.h for more details.
     Tensor(const SizeVector& shape,
            const SizeVector& strides,
-           std::shared_ptr<metal::Buffer> data_ptr,
+           metal::Buffer data_ptr,
            Dtype dtype,
            const std::shared_ptr<Blob>& blob)
         : shape_(shape),
           strides_(strides),
-          data_ptr_(std::move(data_ptr)),
+          data_view_(data_ptr),
           dtype_(dtype),
           blob_(blob) {}
 
@@ -118,20 +118,20 @@ public:
     ///     (row * stride[0] + col * stride[1] + ch * stride[2]));
     ///
     /// \param device Device containing the data buffer.
-    Tensor(std::shared_ptr<metal::Buffer> data_ptr,
+    Tensor(metal::Buffer data_view,
            Dtype dtype,
            const SizeVector& shape,
            const SizeVector& strides = {},
            const Device& device = Device("CPU:0"))
         : shape_(shape),
           strides_(strides),
-          data_ptr_(std::move(data_ptr)),
+          data_view_(data_view),
           dtype_(dtype) {
         if (strides_.empty()) {
             strides_ = shape_util::DefaultStrides(shape);
         }
         // Blob with no-op deleter.
-        blob_ = std::make_shared<Blob>(device, data_ptr_, [](void*) {});
+        blob_ = std::make_shared<Blob>(device, data_view, [](void*) {});
     }
 
     /// Copy constructor performs a "shallow" copy of the Tensor.
@@ -186,7 +186,7 @@ public:
                     "shape ()");
         }
         AssertTemplateDtype<Object>();
-        MemoryManager::MemcpyFromHost(GetDataPtr(), &v, sizeof(Object));
+        MemoryManager::MemcpyFromHost(GetDataView(), &v, sizeof(Object));
         return *this;
     }
 
@@ -590,7 +590,7 @@ public:
         }
         AssertTemplateDtype<T>();
         T value;
-        MemoryManager::MemcpyToHost(&value, *data_ptr_, sizeof(T));
+        MemoryManager::MemcpyToHost(&value, data_view_, sizeof(T));
         return value;
     }
 
@@ -999,7 +999,7 @@ public:
     std::vector<T> ToFlatVector() const {
         AssertTemplateDtype<T>();
         std::vector<T> values(NumElements());
-        MemoryManager::MemcpyToHost(values.data(), *Contiguous().GetDataPtr(),
+        MemoryManager::MemcpyToHost(values.data(), Contiguous().GetDataView(),
                                     GetDtype().ByteSize() * NumElements());
         return values;
     }
@@ -1120,25 +1120,10 @@ public:
         return strides_[shape_util::WrapDim(dim, NumDims())];
     }
 
-    template <typename T>
-    inline T* GetDataPtr() {
-        return const_cast<T*>(const_cast<const Tensor*>(this)->GetDataPtr<T>());
-    }
+    [[nodiscard]] inline metal::Buffer& GetDataView() { return data_view_; }
 
-    template <typename T>
-    inline const T* GetDataPtr() const {
-        if (!dtype_.IsObject() && Dtype::FromType<T>() != dtype_) {
-            utility::LogError(
-                    "Requested values have type {} but Tensor has type {}. "
-                    "Please use non templated GetDataPtr() with manual "
-                    "casting.",
-                    Dtype::FromType<T>().ToString(), dtype_.ToString());
-        }
-        return static_cast<T*>(data_ptr_);
-    }
-
-    [[nodiscard]] inline std::shared_ptr<metal::Buffer> GetDataPtr() const {
-        return data_ptr_;
+    [[nodiscard]] inline const metal::Buffer& GetDataView() const {
+        return data_view_;
     }
 
     [[nodiscard]] inline Dtype GetDtype() const { return dtype_; }
@@ -1288,18 +1273,18 @@ protected:
 
     /// Data pointer pointing to the beginning element of the Tensor.
     ///
-    /// Note that this is not necessarily the same as blob_.GetDataPtr().
+    /// Note that this is not necessarily the same as blob_.GetDataView().
     /// When this happens, it means that the beginning element of the Tensor
     /// is not located a the beginning of the underlying blob. This could
     /// happen, for instance, at slicing:
     ///
     /// ```cpp
-    /// // a.GetDataPtr() == a.GetBlob().GetDataPtr()
+    /// // a.GetDataView() == a.GetBlob().GetDataView()
     /// Tensor a({2, 3}, dtype, "CPU:0");
-    /// // b.GetDataPtr() != b.GetBlob().GetDataPtr()
+    /// // b.GetDataView() != b.GetBlob().GetDataView()
     /// b = a[1];
     /// ```
-    std::shared_ptr<metal::Buffer> data_ptr_;
+    metal::Buffer data_view_;
 
     /// Data type
     Dtype dtype_ = core::Undefined;
@@ -1331,7 +1316,7 @@ inline Tensor::Tensor(const std::vector<bool>& init_vals,
     std::transform(init_vals.begin(), init_vals.end(), init_vals_uchar.begin(),
                    [](bool v) -> uint8_t { return static_cast<uint8_t>(v); });
 
-    MemoryManager::MemcpyFromHost(*blob_->GetDataPtr(), init_vals_uchar.data(),
+    MemoryManager::MemcpyFromHost(blob_->GetDataView(), init_vals_uchar.data(),
                                   init_vals_uchar.size() * dtype.ByteSize());
 }
 
@@ -1340,7 +1325,7 @@ inline std::vector<bool> Tensor::ToFlatVector() const {
     AssertTemplateDtype<bool>();
     std::vector<bool> values(NumElements());
     std::vector<uint8_t> values_uchar(NumElements());
-    MemoryManager::MemcpyToHost(values_uchar.data(), *Contiguous().GetDataPtr(),
+    MemoryManager::MemcpyToHost(values_uchar.data(), Contiguous().GetDataView(),
                                 GetDtype().ByteSize() * NumElements());
 
     // std::vector<bool> possibly implements 1-bit-sized boolean storage.
@@ -1358,7 +1343,7 @@ inline bool Tensor::Item() const {
     }
     AssertTemplateDtype<bool>();
     uint8_t value = 0;
-    MemoryManager::MemcpyToHost(&value, *data_ptr_, sizeof(uint8_t));
+    MemoryManager::MemcpyToHost(&value, data_view_, sizeof(uint8_t));
     return static_cast<bool>(value);
 }
 

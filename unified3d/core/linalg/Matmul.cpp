@@ -55,11 +55,11 @@ void Matmul(const Tensor& A, const Tensor& B, Tensor& output) {
 
     Tensor A_contiguous = A.Contiguous().To(dtype);
     Tensor B_contiguous = B.Contiguous().To(dtype);
-    void* A_data = A_contiguous.GetDataPtr()->CpuAddress();
-    void* B_data = B_contiguous.GetDataPtr()->CpuAddress();
+    void* A_data = A_contiguous.GetDataView().CpuAddress();
+    void* B_data = B_contiguous.GetDataView().CpuAddress();
 
     output = Tensor::Empty({m, n}, dtype, device);
-    void* C_data = output.GetDataPtr()->CpuAddress();
+    void* C_data = output.GetDataView().CpuAddress();
 
     if (device.IsGPU()) {
 #ifdef BUILD_CUDA_MODULE

@@ -217,12 +217,10 @@ std::unique_ptr<Indexer> Indexer::SplitLargestDim() {
     // Get the dimension to split.
     if (ndims_ == 0) {
         utility::LogError("Cannot split when ndims_ == 0");
-        return nullptr;
     }
     if (primary_shape_[ndims_ - 1] < 2) {
         utility::LogError("primary_shape_[ndims_ - 1] = {} < 2, cannot split.",
                           primary_shape_[ndims_ - 1]);
-        return nullptr;
     }
     int64_t max_extent = -1;
     int64_t dim_to_split = -1;
@@ -251,19 +249,16 @@ std::unique_ptr<Indexer> Indexer::SplitLargestDim() {
         utility::LogError(
                 "Internal error: max_extent must be >= 0, but got {}.",
                 max_extent);
-        return nullptr;
     }
     if (!(dim_to_split >= 0 && dim_to_split < ndims_)) {
         utility::LogError(
                 "Internal error: 0 <= dim_to_split < {} required, but got {}.",
                 ndims_, dim_to_split);
-        return nullptr;
     }
     if (primary_shape_[dim_to_split] < 2) {
         utility::LogError(
                 "Internal error: cannot split dimension size {}, must be >= 2.",
                 primary_shape_[dim_to_split]);
-        return nullptr;
     }
 
     std::unique_ptr<Indexer> copy(new Indexer(*this));
@@ -311,20 +306,20 @@ Indexer Indexer::GetPerOutputIndexer(int64_t output_idx) const {
     Indexer sub_indexer = *this;
     for (int64_t dim = 0; dim < sub_indexer.ndims_; ++dim) {
         for (int64_t i = 0; i < sub_indexer.num_inputs_; ++i) {
-            sub_indexer.inputs_[i].data_ptr_ = std::make_shared<metal::Buffer>(
-                    sub_indexer.inputs_[i].data_ptr_->view(
+            sub_indexer.inputs_[i].data_view_ =
+                    sub_indexer.inputs_[i].data_view_.view(
                             sub_indexer.inputs_[i].byte_strides_[dim] *
-                            offset_indices[dim]));
+                            offset_indices[dim]);
 
             if (!sub_indexer.IsReductionDim(dim)) {
                 sub_indexer.inputs_[i].shape_[dim] = 1;
             }
         }
         for (int64_t i = 0; i < sub_indexer.num_outputs_; ++i) {
-            sub_indexer.outputs_[i].data_ptr_ = std::make_shared<metal::Buffer>(
-                    sub_indexer.outputs_[i].data_ptr_->view(
+            sub_indexer.outputs_[i].data_view_ =
+                    sub_indexer.outputs_[i].data_view_.view(
                             sub_indexer.outputs_[i].byte_strides_[dim] *
-                            offset_indices[dim]));
+                            offset_indices[dim]);
             if (!sub_indexer.IsReductionDim(dim)) {
                 sub_indexer.outputs_[i].shape_[dim] = 1;
             }
@@ -344,23 +339,19 @@ void Indexer::ShrinkDim(int64_t dim, int64_t start, int64_t size) {
     // inputs_ and output_'s shapes are not important.
     if (!(dim >= 0 && dim < ndims_)) {
         utility::LogError("0 <= dim < {} required, but got {}.", ndims_, dim);
-        return;
     }
     if (size <= 0) {
         utility::LogError("Invalid size {}, must be > 0.", size);
-        return;
     }
     // Inputs
     for (int64_t i = 0; i < num_inputs_; ++i) {
-        inputs_[i].data_ptr_ =
-                std::make_shared<metal::Buffer>(inputs_[i].data_ptr_->view(
-                        inputs_[i].byte_strides_[dim] * start));
+        inputs_[i].data_view_ = inputs_[i].data_view_.view(
+                inputs_[i].byte_strides_[dim] * start);
     }
     // Outputs
     for (int64_t i = 0; i < num_outputs_; ++i) {
-        outputs_[i].data_ptr_ =
-                std::make_shared<metal::Buffer>(outputs_[i].data_ptr_->view(
-                        outputs_[i].byte_strides_[dim] * start));
+        outputs_[i].data_view_ = outputs_[i].data_view_.view(
+                outputs_[i].byte_strides_[dim] * start);
     }
 
     primary_shape_[dim] = size;

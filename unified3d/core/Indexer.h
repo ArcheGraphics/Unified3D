@@ -84,14 +84,14 @@ struct TensorRef {
     // The default copy constructor works on __device__ as well so we don't
     // define it explicitly. shape_[MAX_DIMS] and strides[MAX_DIMS] will be
     // copied fully.
-    TensorRef() : data_ptr_(nullptr), ndims_(0), dtype_byte_size_(0) {}
+    TensorRef() : data_view_(nullptr), ndims_(0), dtype_byte_size_(0) {}
 
     TensorRef(const Tensor& t) {
         if (t.NumDims() > MAX_DIMS) {
             utility::LogError("Tenor has too many dimensions {} > {}.",
                               t.NumDims(), MAX_DIMS);
         }
-        data_ptr_ = t.GetDataPtr();
+        data_view_ = t.GetDataView();
         ndims_ = t.NumDims();
         dtype_byte_size_ = t.GetDtype().ByteSize();
         for (int64_t i = 0; i < ndims_; ++i) {
@@ -150,7 +150,7 @@ struct TensorRef {
 
     bool operator==(const TensorRef& other) const {
         bool rc = true;
-        rc = rc && (data_ptr_ == other.data_ptr_);
+        rc = rc && (data_view_ == other.data_view_);
         rc = rc && (ndims_ == other.ndims_);
         rc = rc && (dtype_byte_size_ == other.dtype_byte_size_);
         for (int64_t i = 0; i < ndims_; ++i) {
@@ -162,7 +162,7 @@ struct TensorRef {
 
     bool operator!=(const TensorRef& other) const { return !(*this == other); }
 
-    std::shared_ptr<metal::Buffer> data_ptr_;
+    metal::Buffer data_view_;
     int64_t ndims_ = 0;
     int64_t dtype_byte_size_ = 0;
     int64_t shape_[MAX_DIMS]{};
@@ -188,7 +188,7 @@ enum class DtypePolicy {
 /// Tensor a(vals, SizeVector{5}, core::Float32);
 /// TensorIterator iter(a);
 /// for (int64_t i = 0; i < iter.NumWorkloads(); ++i) {
-///     *static_cast<float*>(iter.GetPtr(i)) = 100.f;
+///     *static_cast<float*>(iter.GetView(i)) = 100.f;
 /// }
 /// ```
 class TensorIterator {
@@ -204,10 +204,9 @@ public:
         return num_workloads;
     }
 
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetPtr(
-            int64_t workload_idx) const {
+    [[nodiscard]] metal::Buffer GetView(int64_t workload_idx) const {
         if (workload_idx < 0 || workload_idx >= NumWorkloads()) {
-            return nullptr;
+            return metal::Buffer();
         }
         int64_t offset = 0;
         workload_idx = workload_idx * input_.dtype_byte_size_;
@@ -216,7 +215,7 @@ public:
                       input_.byte_strides_[i];
             workload_idx = workload_idx % input_.byte_strides_[i];
         }
-        return std::make_shared<metal::Buffer>(input_.data_ptr_->view(offset));
+        return input_.data_view_.view(offset);
     }
 
 protected:
@@ -379,13 +378,13 @@ public:
     /// \param input_idx Input tensor index.
     /// \param workload_idx The index of the compute workload, similar to
     /// thread_id, if a thread only processes one workload.
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetInputPtr(
-            int64_t input_idx, int64_t workload_idx) const {
+    [[nodiscard]] metal::Buffer GetInputView(int64_t input_idx,
+                                             int64_t workload_idx) const {
         if (input_idx < 0 || input_idx >= num_inputs_) {
-            return nullptr;
+            return metal::Buffer();
         }
-        return GetWorkloadDataPtr(inputs_[input_idx],
-                                  inputs_contiguous_[input_idx], workload_idx);
+        return GetWorkloadDataView(inputs_[input_idx],
+                                   inputs_contiguous_[input_idx], workload_idx);
     }
 
     /// Get input Tensor data pointer based on \p workload_idx.
@@ -397,23 +396,23 @@ public:
     /// Note: Assumes that sizeof(T) matches the input's dtype size, but does
     /// not check this constraint for performance reasons.
     template <typename T>
-    T* GetInputPtr(int64_t input_idx, int64_t workload_idx) const {
+    [[nodiscard]] metal::Buffer GetInputView(int64_t input_idx,
+                                             int64_t workload_idx) const {
         if (input_idx < 0 || input_idx >= num_inputs_) {
-            return nullptr;
+            return metal::Buffer();
         }
-        return GetWorkloadDataPtr<T>(inputs_[input_idx],
-                                     inputs_contiguous_[input_idx],
-                                     workload_idx);
+        return GetWorkloadDataView<T>(inputs_[input_idx],
+                                      inputs_contiguous_[input_idx],
+                                      workload_idx);
     }
 
     /// Get output Tensor data pointer based on \p workload_idx.
     ///
     /// \param workload_idx The index of the compute workload, similar to
     /// thread_id, if a thread only processes one workload.
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetOutputPtr(
-            int64_t workload_idx) const {
-        return GetWorkloadDataPtr(outputs_[0], outputs_contiguous_[0],
-                                  workload_idx);
+    [[nodiscard]] metal::Buffer GetOutputView(int64_t workload_idx) const {
+        return GetWorkloadDataView(outputs_[0], outputs_contiguous_[0],
+                                   workload_idx);
     }
 
     /// Get output Tensor data pointer based on \p workload_idx.
@@ -424,9 +423,9 @@ public:
     /// Note: Assumes that sizeof(T) matches the output's dtype size, but does
     /// not check this constraint for performance reasons.
     template <typename T>
-    T* GetOutputPtr(int64_t workload_idx) const {
-        return GetWorkloadDataPtr<T>(outputs_[0], outputs_contiguous_[0],
-                                     workload_idx);
+    [[nodiscard]] metal::Buffer GetOutputView(int64_t workload_idx) const {
+        return GetWorkloadDataView<T>(outputs_[0], outputs_contiguous_[0],
+                                      workload_idx);
     }
 
     /// Get output Tensor data pointer based on \p workload_idx.
@@ -434,11 +433,11 @@ public:
     /// \param output_idx Output tensor index.
     /// \param workload_idx The index of the compute workload, similar to
     /// thread_id, if a thread only processes one workload.
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetOutputPtr(
-            int64_t output_idx, int64_t workload_idx) const {
-        return GetWorkloadDataPtr(outputs_[output_idx],
-                                  outputs_contiguous_[output_idx],
-                                  workload_idx);
+    [[nodiscard]] metal::Buffer GetOutputView(int64_t output_idx,
+                                              int64_t workload_idx) const {
+        return GetWorkloadDataView(outputs_[output_idx],
+                                   outputs_contiguous_[output_idx],
+                                   workload_idx);
     }
 
     /// Get output Tensor data pointer based on \p workload_idx.
@@ -447,10 +446,11 @@ public:
     /// \param workload_idx The index of the compute workload, similar to
     /// thread_id, if a thread only processes one workload.
     template <typename T>
-    T* GetOutputPtr(int64_t output_idx, int64_t workload_idx) const {
-        return GetWorkloadDataPtr<T>(outputs_[output_idx],
-                                     outputs_contiguous_[output_idx],
-                                     workload_idx);
+    [[nodiscard]] metal::Buffer GetOutputView(int64_t output_idx,
+                                              int64_t workload_idx) const {
+        return GetWorkloadDataView<T>(outputs_[output_idx],
+                                      outputs_contiguous_[output_idx],
+                                      workload_idx);
     }
 
 protected:
@@ -509,18 +509,17 @@ protected:
     /// Get data pointer from a TensorRef with \p workload_idx.
     /// Note: can be optimized by computing all input ptrs and output ptr
     /// together.
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetWorkloadDataPtr(
+    [[nodiscard]] metal::Buffer GetWorkloadDataView(
             const TensorRef& tr,
             bool tr_contiguous,
             int64_t workload_idx) const {
         // For 0-sized input reduction op, the output Tensor
         // workload_idx == 1 > NumWorkloads() == 0.
         if (workload_idx < 0) {
-            return nullptr;
+            return metal::Buffer();
         }
         if (tr_contiguous) {
-            return std::make_shared<metal::Buffer>(
-                    tr.data_ptr_->view(workload_idx * tr.dtype_byte_size_));
+            return tr.data_view_.view(workload_idx * tr.dtype_byte_size_);
         } else {
             int64_t offset = 0;
             for (int64_t i = 0; i < ndims_; ++i) {
@@ -528,7 +527,7 @@ protected:
                           tr.byte_strides_[i];
                 workload_idx = workload_idx % primary_strides_[i];
             }
-            return std::make_shared<metal::Buffer>(tr.data_ptr_->view(offset));
+            return tr.data_view_.view(offset);
         }
     }
 
@@ -539,18 +538,17 @@ protected:
     /// Note: Assumes that sizeof(T) matches the data's dtype size, but does
     /// not check this constraint for performance reasons.
     template <typename T>
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetWorkloadDataPtr(
+    [[nodiscard]] metal::Buffer GetWorkloadDataView(
             const TensorRef& tr,
             bool tr_contiguous,
             int64_t workload_idx) const {
         // For 0-sized input reduction op, the output Tensor
         // workload_idx == 1 > NumWorkloads() == 0.
         if (workload_idx < 0) {
-            return nullptr;
+            return metal::Buffer();
         }
         if (tr_contiguous) {
-            return std::make_shared<metal::Buffer>(
-                    tr.data_ptr_->view(sizeof(T) * workload_idx));
+            return tr.data_view_.view(sizeof(T) * workload_idx);
         } else {
             int64_t offset = 0;
             for (int64_t i = 0; i < ndims_; ++i) {
@@ -558,7 +556,7 @@ protected:
                           tr.byte_strides_[i];
                 workload_idx = workload_idx % primary_strides_[i];
             }
-            return std::make_shared<metal::Buffer>(tr.data_ptr_->view(offset));
+            return tr.data_view_.view(offset);
         }
     }
 

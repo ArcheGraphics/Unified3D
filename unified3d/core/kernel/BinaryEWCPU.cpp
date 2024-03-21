@@ -21,9 +21,9 @@ static void LaunchBinaryEWKernel(const Indexer& indexer,
                                  const element_func_t& element_func) {
     parallelFor(int64_t(0), indexer.NumWorkloads(),
                 [&indexer, &element_func](int64_t i) {
-                    element_func(indexer.GetInputPtr(0, i)->CpuAddress(),
-                                 indexer.GetInputPtr(1, i)->CpuAddress(),
-                                 indexer.GetOutputPtr(i)->CpuAddress());
+                    element_func(indexer.GetInputView(0, i).CpuAddress(),
+                                 indexer.GetInputView(1, i).CpuAddress(),
+                                 indexer.GetOutputView(i).CpuAddress());
                 });
 }
 

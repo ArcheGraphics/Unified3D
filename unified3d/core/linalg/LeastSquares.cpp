@@ -50,8 +50,8 @@ void LeastSquares(const Tensor &A, const Tensor &B, Tensor &X) {
     Tensor A_copy = A.T().Clone();
     Tensor B_copy = B.T().Clone();
 
-    void *A_data = A_copy.GetDataPtr()->CpuAddress();
-    void *B_data = B_copy.GetDataPtr()->CpuAddress();
+    void *A_data = A_copy.GetDataView().CpuAddress();
+    void *B_data = B_copy.GetDataView().CpuAddress();
 
     if (device.IsGPU()) {
 #ifdef BUILD_CUDA_MODULE

@@ -18,8 +18,8 @@ static void LaunchAdvancedIndexerKernel(const AdvancedIndexer& indexer,
                                         const func_t& func) {
     parallelFor(int64_t(0), indexer.NumWorkloads(),
                 [&indexer, &func](int64_t i) {
-                    func(indexer.GetInputPtr(i)->CpuAddress(),
-                         indexer.GetOutputPtr(i)->CpuAddress());
+                    func(indexer.GetInputView(i).CpuAddress(),
+                         indexer.GetOutputView(i).CpuAddress());
                 });
 }
 

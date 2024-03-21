@@ -38,11 +38,11 @@ void SVD(const Tensor &A, Tensor &U, Tensor &S, Tensor &VT) {
     VT = Tensor::Empty({n, n}, dtype, device);
     Tensor superb = Tensor::Empty({std::min(m, n) - 1}, dtype, device);
 
-    void *A_data = A_T.GetDataPtr()->CpuAddress();
-    void *U_data = U.GetDataPtr()->CpuAddress();
-    void *S_data = S.GetDataPtr()->CpuAddress();
-    void *VT_data = VT.GetDataPtr()->CpuAddress();
-    void *superb_data = superb.GetDataPtr()->CpuAddress();
+    void *A_data = A_T.GetDataView().CpuAddress();
+    void *U_data = U.GetDataView().CpuAddress();
+    void *S_data = S.GetDataView().CpuAddress();
+    void *VT_data = VT.GetDataView().CpuAddress();
+    void *superb_data = superb.GetDataView().CpuAddress();
 
     if (device.IsGPU()) {
 #ifdef BUILD_CUDA_MODULE

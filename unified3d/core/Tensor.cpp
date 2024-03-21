@@ -179,7 +179,7 @@ Tensor& Tensor::operator=(const Tensor& other) & {
     strides_ = other.strides_;
     dtype_ = other.dtype_;
     blob_ = other.blob_;
-    data_ptr_ = other.data_ptr_;
+    data_view_ = other.data_view_;
     return *this;
 }
 
@@ -191,7 +191,7 @@ Tensor& Tensor::operator=(Tensor&& other) & noexcept {
     strides_ = other.strides_;
     dtype_ = other.dtype_;
     blob_ = other.blob_;
-    data_ptr_ = other.data_ptr_;
+    data_view_ = other.data_view_;
     return *this;
 }
 
@@ -216,7 +216,7 @@ Tensor Tensor::ReinterpretCast(const core::Dtype& dtype) const {
                 dtype_.ByteSize(), dtype_.ToString(), dtype.ToString(),
                 dtype.ByteSize());
     }
-    return Tensor(shape_, strides_, data_ptr_, dtype, blob_);
+    return Tensor(shape_, strides_, data_view_, dtype, blob_);
 }
 
 Tensor Tensor::Empty(const SizeVector& shape,
@@ -615,9 +615,10 @@ std::string Tensor::ToString(bool with_suffix,
             rc << "0-element Tensor";
         } else if (shape_.empty()) {
             rc << indent;
-            rc << ScalarPtrToString(data_ptr_.get());
+            rc << ScalarPtrToString(data_view_.CpuAddress());
         } else if (shape_.size() == 1) {
-            const char* ptr = static_cast<const char*>((void*)data_ptr_.get());
+            const char* ptr =
+                    static_cast<const char*>((void*)data_view_.CpuAddress());
             rc << "[";
             std::string delim;
             int64_t element_byte_size = dtype_.ByteSize();
@@ -644,7 +645,7 @@ std::string Tensor::ToString(bool with_suffix,
         rc << fmt::format("\nTensor[shape={}, stride={}, {}, {}, {}]",
                           shape_.ToString(), strides_.ToString(),
                           dtype_.ToString(), GetDevice().ToString(),
-                          (void*)data_ptr_.get());
+                          (void*)data_view_.CpuAddress());
     }
     return rc.str();
 }
@@ -676,8 +677,8 @@ Tensor Tensor::IndexExtract(int64_t dim, int64_t idx) const {
     new_shape.erase(new_shape.begin() + dim);
     SizeVector new_strides(strides_);
     new_strides.erase(new_strides.begin() + dim);
-    auto new_data_ptr = std::make_shared<metal::Buffer>(
-            data_ptr_->view(strides_[dim] * dtype_.ByteSize() * idx));
+    auto new_data_ptr =
+            data_view_.view(strides_[dim] * dtype_.ByteSize() * idx);
     return Tensor(new_shape, new_strides, new_data_ptr, dtype_, blob_);
 }
 
@@ -720,8 +721,8 @@ Tensor Tensor::Slice(int64_t dim,
         stop = shape_[dim];
     }
 
-    auto new_data_ptr = std::make_shared<metal::Buffer>(
-            data_ptr_->view(start * strides_[dim] * dtype_.ByteSize()));
+    auto new_data_ptr =
+            data_view_.view(start * strides_[dim] * dtype_.ByteSize());
     SizeVector new_shape = shape_;
     SizeVector new_strides = strides_;
     new_shape[dim] = (stop - start + step - 1) / step;
@@ -887,7 +888,7 @@ Tensor Tensor::Permute(const SizeVector& dims) const {
 
 Tensor Tensor::AsStrided(const SizeVector& new_shape,
                          const SizeVector& new_strides) const {
-    Tensor result(new_shape, new_strides, data_ptr_, dtype_, blob_);
+    Tensor result(new_shape, new_strides, data_view_, dtype_, blob_);
     return result;
 }
 
@@ -1667,7 +1668,7 @@ Tensor Tensor::IsClose(const Tensor& other, double rtol, double atol) const {
 bool Tensor::IsSame(const Tensor& other) const {
     AssertTensorDevice(other, GetDevice());
     return blob_ == other.blob_ && shape_ == other.shape_ &&
-           strides_ == other.strides_ && data_ptr_ == other.data_ptr_ &&
+           strides_ == other.strides_ && data_view_ == other.data_view_ &&
            dtype_ == other.dtype_;
 }
 

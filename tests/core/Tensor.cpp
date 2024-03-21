@@ -90,7 +90,7 @@ TEST_P(TensorPermuteDevices, WithInitValue) {
 
     // Wrapper
     {
-        core::Tensor wrapper(t.GetDataPtr(), t.GetDtype(), t.GetShape(), {},
+        core::Tensor wrapper(t.GetDataView(), t.GetDtype(), t.GetShape(), {},
                              t.GetDevice());
         EXPECT_EQ(t.GetStrides(), wrapper.GetStrides());
         EXPECT_EQ(wrapper.ToFlatVector<float>(), vals);
@@ -404,7 +404,7 @@ TEST_P(TensorPermuteDevices, Expand) {
     EXPECT_EQ(dst_t.GetShape(), dst_shape);
     EXPECT_EQ(dst_t.ToFlatVector<float>(), dst_vals);
     EXPECT_EQ(dst_t.GetBlob(), src_t.GetBlob());
-    EXPECT_EQ(dst_t.GetDataPtr(), src_t.GetDataPtr());
+    EXPECT_EQ(dst_t.GetDataView(), src_t.GetDataView());
 }
 
 TEST_P(TensorPermuteDevices, Flatten) {
@@ -568,44 +568,44 @@ TEST_P(TensorPermuteDevices, OperatorSquareBrackets) {
     core::Tensor t_0 = t[0];
     EXPECT_EQ(t_0.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_0.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_0.GetDataPtr()->CpuAddress(), t.GetDataPtr()->CpuAddress());
+    EXPECT_EQ(t_0.GetDataView().CpuAddress(), t.GetDataView().CpuAddress());
     EXPECT_EQ(t_0.GetBlob(), t.GetBlob());
 
     t_0 = t[-2];  // t[-2] == t[0]
     EXPECT_EQ(t_0.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_0.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_0.GetDataPtr()->CpuAddress(), t.GetDataPtr()->CpuAddress());
+    EXPECT_EQ(t_0.GetDataView().CpuAddress(), t.GetDataView().CpuAddress());
     EXPECT_EQ(t_0.GetBlob(), t.GetBlob());
 
     core::Tensor t_1 = t[1];
     EXPECT_EQ(t_1.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_1.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_1.GetDataPtr()->CpuAddress(),
-              (uint8_t *)t.GetDataPtr()->CpuAddress() +
+    EXPECT_EQ(t_1.GetDataView().CpuAddress(),
+              (uint8_t *)t.GetDataView().CpuAddress() +
                       1 * 3 * 4 * sizeof(float));
     EXPECT_EQ(t_1.GetBlob(), t.GetBlob());
 
     t_1 = t[-1];  // t[-1] == t[1]
     EXPECT_EQ(t_1.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_1.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_1.GetDataPtr()->CpuAddress(),
-              (uint8_t *)t.GetDataPtr()->CpuAddress() +
+    EXPECT_EQ(t_1.GetDataView().CpuAddress(),
+              (uint8_t *)t.GetDataView().CpuAddress() +
                       1 * 3 * 4 * sizeof(float));
     EXPECT_EQ(t_1.GetBlob(), t.GetBlob());
 
     core::Tensor t_1_2 = t[1][2];
     EXPECT_EQ(t_1_2.GetShape(), core::SizeVector({4}));
     EXPECT_EQ(t_1_2.GetStrides(), core::SizeVector({1}));
-    EXPECT_EQ(t_1_2.GetDataPtr()->CpuAddress(),
-              (uint8_t *)t.GetDataPtr()->CpuAddress() +
+    EXPECT_EQ(t_1_2.GetDataView().CpuAddress(),
+              (uint8_t *)t.GetDataView().CpuAddress() +
                       (1 * 3 * 4 + 2 * 4) * sizeof(float));
     EXPECT_EQ(t_1_2.GetBlob(), t.GetBlob());
 
     core::Tensor t_1_2_3 = t[1][2][3];
     EXPECT_EQ(t_1_2_3.GetShape(), core::SizeVector({}));
     EXPECT_EQ(t_1_2_3.GetStrides(), core::SizeVector({}));
-    EXPECT_EQ(t_1_2_3.GetDataPtr()->CpuAddress(),
-              (uint8_t *)t.GetDataPtr()->CpuAddress() +
+    EXPECT_EQ(t_1_2_3.GetDataView().CpuAddress(),
+              (uint8_t *)t.GetDataView().CpuAddress() +
                       (1 * 3 * 4 + 2 * 4 + 3) * sizeof(float));
     EXPECT_EQ(t_1_2_3.GetBlob(), t.GetBlob());
 }
@@ -757,17 +757,18 @@ TEST_P(TensorPermuteDevicePairs, CopyContiguous) {
     core::Tensor t_1 = t[1];
     EXPECT_EQ(t_1.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_1.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_1.GetDataPtr()->CpuAddress(),
-              (uint8_t *)t.GetDataPtr()->CpuAddress() +
+    EXPECT_EQ(t_1.GetDataView().CpuAddress(),
+              (uint8_t *)t.GetDataView().CpuAddress() +
                       1 * 3 * 4 * sizeof(float));
-    EXPECT_NE(t_1.GetDataPtr(), t_1.GetBlob()->GetDataPtr());
+    EXPECT_NE(t_1.GetDataView(), t_1.GetBlob()->GetDataView());
     EXPECT_TRUE(t_1.IsContiguous());
 
     core::Tensor t_1_copy = t_1.To(dst_device, /*copy=*/true);
     EXPECT_EQ(t_1_copy.GetShape(), core::SizeVector({3, 4}));
     EXPECT_EQ(t_1_copy.GetStrides(), core::SizeVector({4, 1}));
-    EXPECT_EQ(t_1_copy.GetDataPtr(),
-              t_1_copy.GetBlob()->GetDataPtr());  // Points to beginning of Blob
+    EXPECT_EQ(
+            t_1_copy.GetDataView(),
+            t_1_copy.GetBlob()->GetDataView());  // Points to beginning of Blob
 }
 
 TEST_P(TensorPermuteDevices, Slice) {
@@ -778,16 +779,16 @@ TEST_P(TensorPermuteDevices, Slice) {
              {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}},
             device);
 
-    const void *blob_head = t.GetBlob()->GetDataPtr()->CpuAddress();
+    const void *blob_head = t.GetBlob()->GetDataView().CpuAddress();
     EXPECT_EQ(t.GetShape(), core::SizeVector({2, 3, 4}));
     EXPECT_EQ(t.GetStrides(), core::SizeVector({12, 4, 1}));
-    EXPECT_EQ(t.GetDataPtr()->CpuAddress(), blob_head);
+    EXPECT_EQ(t.GetDataView().CpuAddress(), blob_head);
 
     // t_1 = t[0:2:1], effectively not sliced
     core::Tensor t_1 = t.Slice(0, 0, 2, 1);
     EXPECT_EQ(t_1.GetShape(), core::SizeVector({2, 3, 4}));
     EXPECT_EQ(t_1.GetStrides(), core::SizeVector({12, 4, 1}));
-    EXPECT_EQ(t_1.GetDataPtr()->CpuAddress(), blob_head);
+    EXPECT_EQ(t_1.GetDataView().CpuAddress(), blob_head);
     EXPECT_EQ(t_1.ToFlatVector<float>(),
               std::vector<float>({0,  1,  2,  3,  4,  5,  6,  7,
                                   8,  9,  10, 11, 12, 13, 14, 15,
@@ -797,7 +798,7 @@ TEST_P(TensorPermuteDevices, Slice) {
     core::Tensor t_2 = t.Slice(0, 0, 2, 1).Slice(1, 0, 3, 2);
     EXPECT_EQ(t_2.GetShape(), core::SizeVector({2, 2, 4}));
     EXPECT_EQ(t_2.GetStrides(), core::SizeVector({12, 8, 1}));
-    EXPECT_EQ(t_2.GetDataPtr()->CpuAddress(), blob_head);
+    EXPECT_EQ(t_2.GetDataView().CpuAddress(), blob_head);
     EXPECT_EQ(t_2.ToFlatVector<float>(),
               std::vector<float>({0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 20,
                                   21, 22, 23}));
@@ -806,7 +807,7 @@ TEST_P(TensorPermuteDevices, Slice) {
     core::Tensor t_3 = t.Slice(0, 0, 2, 1).Slice(1, 0, 3, 2).Slice(2, 0, 4, 2);
     EXPECT_EQ(t_3.GetShape(), core::SizeVector({2, 2, 2}));
     EXPECT_EQ(t_3.GetStrides(), core::SizeVector({12, 8, 2}));
-    EXPECT_EQ(t_3.GetDataPtr()->CpuAddress(), blob_head);
+    EXPECT_EQ(t_3.GetDataView().CpuAddress(), blob_head);
     EXPECT_EQ(t_3.ToFlatVector<float>(),
               std::vector<float>({0, 2, 8, 10, 12, 14, 20, 22}));
 
@@ -814,7 +815,7 @@ TEST_P(TensorPermuteDevices, Slice) {
     core::Tensor t_4 = t[1].Slice(0, 0, 3, 2).Slice(1, 0, 4, 2);
     EXPECT_EQ(t_4.GetShape(), core::SizeVector({2, 2}));
     EXPECT_EQ(t_4.GetStrides(), core::SizeVector({8, 2}));
-    EXPECT_EQ(t_4.GetDataPtr()->CpuAddress(),
+    EXPECT_EQ(t_4.GetDataView().CpuAddress(),
               static_cast<const char *>(blob_head) +
                       core::Float32.ByteSize() * 3 * 4);
     EXPECT_EQ(t_4.ToFlatVector<float>(), std::vector<float>({12, 14, 20, 22}));
@@ -823,7 +824,7 @@ TEST_P(TensorPermuteDevices, Slice) {
     core::Tensor t_5 = t[1].Slice(0, 0, -1).Slice(1, 0, -2, 2);
     EXPECT_EQ(t_5.GetShape(), core::SizeVector({2, 1}));
     EXPECT_EQ(t_5.GetStrides(), core::SizeVector({4, 2}));
-    EXPECT_EQ(t_5.GetDataPtr()->CpuAddress(),
+    EXPECT_EQ(t_5.GetDataView().CpuAddress(),
               static_cast<const char *>(blob_head) +
                       core::Float32.ByteSize() * 3 * 4);
     EXPECT_EQ(t_5.ToFlatVector<float>(), std::vector<float>({12, 16}));
@@ -1466,7 +1467,7 @@ TEST_P(TensorPermuteDevices, Permute) {
 
     core::Tensor t_1 = t.Permute({2, 1, 0});
     EXPECT_EQ(t_1.GetBlob(), t.GetBlob());
-    EXPECT_EQ(t_1.GetDataPtr(), t.GetDataPtr());
+    EXPECT_EQ(t_1.GetDataView(), t.GetDataView());
     EXPECT_EQ(t_1.GetShape(), core::SizeVector({4, 3, 2}));
     EXPECT_EQ(t_1.GetStrides(), core::SizeVector({1, 4, 12}));
     EXPECT_EQ(t_1.ToFlatVector<float>(),
@@ -1475,7 +1476,7 @@ TEST_P(TensorPermuteDevices, Permute) {
 
     core::Tensor t_2 = t.Permute({0, 2, 1});
     EXPECT_EQ(t_2.GetBlob(), t.GetBlob());
-    EXPECT_EQ(t_2.GetDataPtr(), t.GetDataPtr());
+    EXPECT_EQ(t_2.GetDataView(), t.GetDataView());
     EXPECT_EQ(t_2.GetShape(), core::SizeVector({2, 4, 3}));
     EXPECT_EQ(t_2.GetStrides(), core::SizeVector({12, 1, 4}));
     EXPECT_EQ(t_2.ToFlatVector<float>(),
@@ -1494,7 +1495,7 @@ TEST_P(TensorPermuteDevices, Transpose) {
 
     core::Tensor t_t = t.Transpose(1, 2);
     EXPECT_EQ(t_t.GetBlob(), t.GetBlob());
-    EXPECT_EQ(t_t.GetDataPtr(), t.GetDataPtr());
+    EXPECT_EQ(t_t.GetDataView(), t.GetDataView());
     EXPECT_EQ(t_t.GetShape(), core::SizeVector({2, 4, 3}));
     EXPECT_EQ(t_t.GetStrides(), core::SizeVector({12, 1, 4}));
     EXPECT_EQ(t_t.ToFlatVector<float>(),
@@ -1513,7 +1514,7 @@ TEST_P(TensorPermuteDevices, T) {
 
     core::Tensor t_t = t.T();
     EXPECT_EQ(t_t.GetBlob(), t.GetBlob());
-    EXPECT_EQ(t_t.GetDataPtr(), t.GetDataPtr());
+    EXPECT_EQ(t_t.GetDataView(), t.GetDataView());
     EXPECT_EQ(t_t.GetShape(), core::SizeVector({4, 6}));
     EXPECT_EQ(t_t.GetStrides(), core::SizeVector({1, 4}));
     EXPECT_EQ(t_t.ToFlatVector<float>(),
@@ -1557,21 +1558,21 @@ TEST_P(TensorPermuteDevices, ShallowCopyConstructor) {
 
     // Copy constructor.
     core::Tensor t_copy(t);
-    EXPECT_EQ(t.GetDataPtr(), t_copy.GetDataPtr());
+    EXPECT_EQ(t.GetDataView(), t_copy.GetDataView());
 
     // Vector initialization.
     std::vector<core::Tensor> t_vec0{t};
-    EXPECT_EQ(t.GetDataPtr(), t_vec0[0].GetDataPtr());
+    EXPECT_EQ(t.GetDataView(), t_vec0[0].GetDataView());
 
     std::vector<core::Tensor> t_vec1({t});
-    EXPECT_EQ(t.GetDataPtr(), t_vec1[0].GetDataPtr());
+    EXPECT_EQ(t.GetDataView(), t_vec1[0].GetDataView());
 
     // Vector initialization list passed to function.
     auto FirstTensorDataPtr =
             [](const std::vector<core::Tensor> &tensors) -> void * {
-        return const_cast<void *>(tensors[0].GetDataPtr()->CpuAddress());
+        return const_cast<void *>(tensors[0].GetDataView().CpuAddress());
     };
-    EXPECT_EQ(t.GetDataPtr()->CpuAddress(), FirstTensorDataPtr({t}));
+    EXPECT_EQ(t.GetDataView().CpuAddress(), FirstTensorDataPtr({t}));
 }
 
 TEST_P(TensorPermuteDevices, AdvancedIndexing_IsIndexSplittedBySlice) {

@@ -26,7 +26,7 @@ void LaunchIndexReductionKernel(int64_t dim,
 
     // Index is simply a 1D contiguous tensor, with a different stride
     // behavior to src. So use raw pointer for simplicity.
-    auto index_ptr = (int64_t*)index.GetDataPtr()->CpuAddress();
+    auto index_ptr = (int64_t*)index.GetDataView().CpuAddress();
 
     int64_t broadcasting_elems = 1;
     for (int64_t d = 1; d < src.NumDims(); ++d) {
@@ -39,8 +39,8 @@ void LaunchIndexReductionKernel(int64_t dim,
         const int64_t idx = index_ptr[reduction_idx];
         int64_t dst_idx = idx * broadcasting_elems + broadcasting_idx;
 
-        void* src_ptr = indexer.GetOutputPtr(0, workload_idx)->CpuAddress();
-        void* dst_ptr = indexer.GetInputPtr(0, dst_idx)->CpuAddress();
+        void* src_ptr = indexer.GetOutputView(0, workload_idx).CpuAddress();
+        void* dst_ptr = indexer.GetInputView(0, dst_idx).CpuAddress();
         // Note input and output is switched here to adapt to the indexer
         element_kernel(src_ptr, dst_ptr);
     };

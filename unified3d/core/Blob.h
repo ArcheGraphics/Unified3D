@@ -41,7 +41,7 @@ public:
     /// \param device Device where the blob resides.
     Blob(int64_t byte_size, const Device& device)
         : deleter_(nullptr),
-          data_ptr_(MemoryManager::Malloc(byte_size, device)),
+          data_holder_(MemoryManager::Malloc(byte_size, device)),
           device_(device) {}
 
     /// Construct Blob with externally managed memory.
@@ -52,9 +52,9 @@ public:
     /// notify the external memory manager that the memory is no longer needed.
     /// It's up to the external manager to free the memory.
     Blob(const Device& device,
-         std::shared_ptr<metal::Buffer> data_ptr,
+         metal::Buffer data_view,
          const std::function<void(void*)>& deleter)
-        : deleter_(deleter), data_ptr_(std::move(data_ptr)), device_(device) {}
+        : deleter_(deleter), data_holder_(data_view), device_(device) {}
 
     ~Blob() {
         if (deleter_) {
@@ -64,14 +64,16 @@ public:
             // deleter.
             deleter_(nullptr);
         } else {
-            MemoryManager::Free(data_ptr_, device_);
+            MemoryManager::Free(data_holder_, device_);
         }
     };
 
     [[nodiscard]] Device GetDevice() const { return device_; }
 
-    [[nodiscard]] std::shared_ptr<metal::Buffer> GetDataPtr() const {
-        return data_ptr_;
+    [[nodiscard]] metal::Buffer& GetDataView() { return data_holder_; }
+
+    [[nodiscard]] const metal::Buffer& GetDataView() const {
+        return data_holder_;
     }
 
 protected:
@@ -79,7 +81,7 @@ protected:
     std::function<void(void*)> deleter_ = nullptr;
 
     /// Device data pointer.
-    std::shared_ptr<metal::Buffer> data_ptr_;
+    metal::Buffer data_holder_;
 
     /// Device context for the blob.
     Device device_;

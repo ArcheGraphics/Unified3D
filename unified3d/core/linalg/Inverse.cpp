@@ -63,11 +63,11 @@ void Inverse(const Tensor &A, Tensor &output) {
             utility::LogError("Unsupported UNIFIED3D_CPU_LINALG_INT type.");
         }
         Tensor ipiv = Tensor::Empty({n}, ipiv_dtype, device);
-        void *ipiv_data = ipiv.GetDataPtr()->CpuAddress();
+        void *ipiv_data = ipiv.GetDataView().CpuAddress();
 
         // LAPACKE supports getri, A is in-place modified as output.
         Tensor A_T = A.T().To(device, /*copy=*/true);
-        void *A_data = A_T.GetDataPtr()->CpuAddress();
+        void *A_data = A_T.GetDataView().CpuAddress();
 
         InverseCPU(A_data, ipiv_data, nullptr, n, dtype, device);
         output = A_T.T();

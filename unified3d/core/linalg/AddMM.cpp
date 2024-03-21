@@ -83,9 +83,9 @@ void AddMM(const Tensor& A,
                 "Tensor shapes should not contain dimensions with zero.");
     }
 
-    auto A_data = A_contiguous.To(dtype).GetDataPtr();
-    auto B_data = B_contiguous.To(dtype).GetDataPtr();
-    auto C_data = output.GetDataPtr();
+    auto A_data = A_contiguous.To(dtype).GetDataView();
+    auto B_data = B_contiguous.To(dtype).GetDataView();
+    auto C_data = output.GetDataView();
 
     if (device.IsGPU()) {
 #ifdef BUILD_CUDA_MODULE
@@ -96,9 +96,8 @@ void AddMM(const Tensor& A,
         utility::LogError("Unimplemented device.");
 #endif
     } else {
-        AddMMCPU(B_data->CpuAddress(), A_data->CpuAddress(),
-                 C_data->CpuAddress(), n, k, m, alpha, beta, transB, transA,
-                 ldb, lda, ldc, dtype);
+        AddMMCPU(B_data.CpuAddress(), A_data.CpuAddress(), C_data.CpuAddress(),
+                 n, k, m, alpha, beta, transB, transA, ldb, lda, ldc, dtype);
     }
 }
 

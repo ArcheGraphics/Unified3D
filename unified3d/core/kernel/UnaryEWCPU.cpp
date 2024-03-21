@@ -23,8 +23,8 @@ static void LaunchUnaryEWKernel(const Indexer& indexer,
                                 const element_func_t& element_func) {
     parallelFor(int64_t(0), indexer.NumWorkloads(),
                 [&indexer, &element_func](int64_t i) {
-                    element_func(indexer.GetInputPtr(0, i)->CpuAddress(),
-                                 indexer.GetOutputPtr(i)->CpuAddress());
+                    element_func(indexer.GetInputView(0, i).CpuAddress(),
+                                 indexer.GetOutputView(i).CpuAddress());
                 });
 }
 
@@ -33,8 +33,8 @@ static void LaunchUnaryEWKernel(const Indexer& indexer,
                                 const element_func_t& element_func) {
     parallelFor(int64_t(0), indexer.NumWorkloads(),
                 [&indexer, &element_func](int64_t i) {
-                    element_func(indexer.GetInputPtr(0, i)->CpuAddress(),
-                                 indexer.GetOutputPtr(i)->CpuAddress());
+                    element_func(indexer.GetInputView(0, i).CpuAddress(),
+                                 indexer.GetOutputView(i).CpuAddress());
                 });
 }
 
@@ -48,8 +48,8 @@ static void LaunchUnaryEWKernel(const Indexer& indexer,
     ParallelFor(
             Device("CPU:0"), indexer.NumWorkloads(),
             [&indexer, &element_func](int64_t i) {
-                element_func(indexer.GetInputPtr<src_t>(0, i),
-                             indexer.GetOutputPtr<dst_t>(i));
+                element_func(indexer.GetInputView<src_t>(0, i),
+                             indexer.GetOutputView<dst_t>(i));
             },
             vec_func);
 }
@@ -169,7 +169,7 @@ void CopyCPU(const Tensor& src, Tensor& dst) {
     Dtype dst_dtype = dst.GetDtype();
     if (src.IsContiguous() && dst.IsContiguous() &&
         src.GetShape() == dst.GetShape() && src_dtype == dst_dtype) {
-        MemoryManager::MemcpyOnCpu(*dst.GetDataPtr(), *src.GetDataPtr(),
+        MemoryManager::MemcpyOnCpu(dst.GetDataView(), src.GetDataView(),
                                    src_dtype.ByteSize() * shape.NumElements());
     } else if (dst.NumElements() > 1 && dst.IsContiguous() &&
                src.NumElements() == 1 && !src_dtype.IsObject()) {
@@ -178,7 +178,7 @@ void CopyCPU(const Tensor& src, Tensor& dst) {
         DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(dst_dtype, [&]() {
             auto scalar_element = src.To(dst_dtype).Item<scalar_t>();
             scalar_t* dst_ptr =
-                    static_cast<scalar_t*>(dst.GetDataPtr()->CpuAddress());
+                    static_cast<scalar_t*>(dst.GetDataView().CpuAddress());
             parallelFor(int64_t(0), num_elements, [&](int64_t workload_idx) {
                 dst_ptr[workload_idx] = scalar_element;
             });

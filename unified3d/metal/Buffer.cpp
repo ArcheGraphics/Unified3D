@@ -20,6 +20,15 @@ Buffer Buffer::view(uint64_t offset) const {
     return Buffer{ptr_, offset + offset_};
 }
 
+bool Buffer::operator==(const Buffer &other) const {
+    return this->ptr_ == other.ptr_ &&
+           this->offset_ == other.offset_;
+}
+
+bool Buffer::operator!=(const Buffer &other) const {
+    return !operator==(other);
+}
+
 namespace {
 
 BufferCache::BufferCache(MTL::Device* device)
@@ -160,7 +169,7 @@ size_t Allocator::SetMemoryLimit(size_t limit, bool relaxed) {
     return limit;
 }
 
-std::shared_ptr<Buffer> Allocator::Malloc(size_t size, bool allow_swap /* = false */) {
+Buffer Allocator::Malloc(size_t size, bool allow_swap /* = false */) {
     // Metal doesn't like empty buffers
     size = std::max<size_t>(size, 4);
 
@@ -177,7 +186,7 @@ std::shared_ptr<Buffer> Allocator::Malloc(size_t size, bool allow_swap /* = fals
 
         // If there is too much memory pressure, fail (likely causes a wait).
         if (!(allow_swap && relaxed_) && mem_required >= block_limit_) {
-            return nullptr;
+            return Buffer{nullptr};
         }
 
         auto thread_pool = NewScopedMemoryPool();
@@ -205,11 +214,11 @@ std::shared_ptr<Buffer> Allocator::Malloc(size_t size, bool allow_swap /* = fals
         buffer_cache_.ReleaseCachedBuffers(GetCacheMemory() - max_pool_size_);
     }
 
-    return std::make_shared<Buffer>(buf, 0);
+    return Buffer(buf);
 }
 
-void Allocator::Free(std::shared_ptr<Buffer>& buffer) {
-    auto buf = buffer->Ptr();
+void Allocator::Free(Buffer& buffer) {
+    auto buf = buffer.Ptr();
     std::unique_lock lk(mutex_);
     active_memory_ -= buf->length();
     if (GetCacheMemory() < max_pool_size_) {

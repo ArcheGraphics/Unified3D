@@ -23,7 +23,7 @@ Tensor NonZeroCPU(const Tensor& src) {
         auto it = std::copy_if(
                 indices.begin(), indices.end(), non_zero_indices.begin(),
                 [&src_iter](int64_t index) {
-                    const void* src_ptr = src_iter.GetPtr(index)->CpuAddress();
+                    const void* src_ptr = src_iter.GetView(index).CpuAddress();
                     UNIFIED3D_ASSERT(src_ptr != nullptr && "Internal error.");
                     return static_cast<float>(
                                    *static_cast<const scalar_t*>(src_ptr)) != 0;
@@ -47,7 +47,7 @@ Tensor NonZeroCPU(const Tensor& src) {
         int64_t non_zero_index = non_zero_indices[i];
         for (int64_t dim = num_dims - 1; dim >= 0; dim--) {
             void* result_ptr =
-                    result_iter.GetPtr(dim * num_non_zeros + i)->CpuAddress();
+                    result_iter.GetView(dim * num_non_zeros + i).CpuAddress();
             UNIFIED3D_ASSERT(result_ptr != nullptr && "Internal error.");
             *static_cast<int64_t*>(result_ptr) = non_zero_index % shape[dim];
             non_zero_index = non_zero_index / shape[dim];

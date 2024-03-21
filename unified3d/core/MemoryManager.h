@@ -17,10 +17,10 @@ class MemoryManager {
 public:
     /// Allocates memory of \p byte_size bytes on device \p device and returns a
     /// pointer to the beginning of the allocated memory block.
-    static std::shared_ptr<metal::Buffer> Malloc(size_t byte_size, const Device& device);
+    static metal::Buffer Malloc(size_t byte_size, const Device& device);
 
     /// Frees previously allocated memory at address \p ptr on device \p device.
-    static void Free(std::shared_ptr<metal::Buffer>& ptr, const Device& device);
+    static void Free(metal::Buffer& ptr, const Device& device);
 
     /// Copies \p num_bytes bytes of memory at address \p src_ptr on device
     /// \p src_device to address \p dst_ptr on device \p dst_device.

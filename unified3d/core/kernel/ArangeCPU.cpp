@@ -19,7 +19,7 @@ void ArangeCPU(const Tensor& start,
     DISPATCH_DTYPE_TO_TEMPLATE(dtype, [&]() {
         auto sstart = start.Item<scalar_t>();
         auto sstep = step.Item<scalar_t>();
-        scalar_t* dst_ptr = (scalar_t*)dst.GetDataPtr()->CpuAddress();
+        scalar_t* dst_ptr = (scalar_t*)dst.GetDataView().CpuAddress();
         int64_t n = dst.GetLength();
         parallelFor(int64_t(0), n, [&](int64_t workload_idx) {
             dst_ptr[workload_idx] =

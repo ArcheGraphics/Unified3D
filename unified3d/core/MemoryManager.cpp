@@ -14,14 +14,12 @@
 
 namespace u3d::core {
 
-std::shared_ptr<metal::Buffer> MemoryManager::Malloc(size_t byte_size, const Device& device) {
+metal::Buffer MemoryManager::Malloc(size_t byte_size, const Device& device) {
     return metal::Allocator::GetInstance().Malloc(byte_size, true);
 }
 
-void MemoryManager::Free(std::shared_ptr<metal::Buffer>& ptr, const Device& device) {
-    if (ptr) {
-        metal::Allocator::GetInstance().Free(ptr);
-    }
+void MemoryManager::Free(metal::Buffer& ptr, const Device& device) {
+    metal::Allocator::GetInstance().Free(ptr);
 }
 
 void MemoryManager::MemcpyOnCpu(metal::Buffer& dst_ptr,

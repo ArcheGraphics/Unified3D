@@ -357,7 +357,7 @@ static void WriteNpzOneTensor(const std::string& file_name,
                               const std::string& tensor_name,
                               const core::Tensor& tensor,
                               bool append) {
-    const void* data = tensor.GetDataPtr()->CpuAddress();
+    const void* data = tensor.GetDataView().CpuAddress();
     const core::SizeVector shape = tensor.GetShape();
     const core::Dtype dtype = tensor.GetDtype();
     const int64_t element_byte_size = dtype.ByteSize();
@@ -511,12 +511,12 @@ public:
 
     template <typename T>
     T* GetDataPtr() {
-        return reinterpret_cast<T*>(blob_->GetDataPtr()->CpuAddress());
+        return reinterpret_cast<T*>(blob_->GetDataView().CpuAddress());
     }
 
     template <typename T>
     [[nodiscard]] const T* GetDataPtr() const {
-        return reinterpret_cast<const T*>(blob_->GetDataPtr()->CpuAddress());
+        return reinterpret_cast<const T*>(blob_->GetDataView().CpuAddress());
     }
 
     [[nodiscard]] core::Dtype GetDtype() const {
@@ -558,7 +558,7 @@ public:
         }
         // t.blob_ is the same as blob_, no need for memory copy.
         core::Tensor t(shape_, core::shape_util::DefaultStrides(shape_),
-                       blob_->GetDataPtr(), dtype, blob_);
+                       blob_->GetDataView(), dtype, blob_);
         return t;
     }
 

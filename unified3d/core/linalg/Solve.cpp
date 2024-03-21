@@ -52,10 +52,10 @@ void Solve(const Tensor &A, const Tensor &B, Tensor &X) {
 
     // A and B are modified in-place
     Tensor A_copy = A.T().Clone();
-    void *A_data = A_copy.GetDataPtr()->CpuAddress();
+    void *A_data = A_copy.GetDataView().CpuAddress();
 
     X = B.T().Clone();
-    void *B_data = X.GetDataPtr()->CpuAddress();
+    void *B_data = X.GetDataView().CpuAddress();
 
     if (device.IsGPU()) {
 #ifdef BUILD_CUDA_MODULE
@@ -77,7 +77,7 @@ void Solve(const Tensor &A, const Tensor &B, Tensor &X) {
             utility::LogError("Unsupported UNIFIED3D_CPU_LINALG_INT type.");
         }
         Tensor ipiv = Tensor::Empty({n}, ipiv_dtype, device);
-        void *ipiv_data = ipiv.GetDataPtr()->CpuAddress();
+        void *ipiv_data = ipiv.GetDataView().CpuAddress();
 
         SolveCPU(A_data, B_data, ipiv_data, n, k, dtype, device);
     }

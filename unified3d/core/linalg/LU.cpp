@@ -20,9 +20,9 @@ static core::Tensor GetColPermutation(const Tensor& ipiv,
             Tensor::Arange(0, number_of_rows, 1, core::Int32, Device("CPU:0"));
     Tensor ipiv_cpu = ipiv.To(Device("CPU:0"), core::Int32, /*copy=*/false);
     const int* ipiv_ptr =
-            static_cast<const int*>(ipiv_cpu.GetDataPtr()->CpuAddress());
+            static_cast<const int*>(ipiv_cpu.GetDataView().CpuAddress());
     int* full_ipiv_ptr =
-            static_cast<int*>(full_ipiv.GetDataPtr()->CpuAddress());
+            static_cast<int*>(full_ipiv.GetDataView().CpuAddress());
     for (int i = 0; i < number_of_indices; i++) {
         int temp = full_ipiv_ptr[i];
         full_ipiv_ptr[i] = full_ipiv_ptr[ipiv_ptr[i] - 1];
@@ -80,7 +80,7 @@ void LUIpiv(const Tensor& A, Tensor& ipiv, Tensor& output) {
     // "output" tensor is modified in-place as output.
     // Operations are COL_MAJOR.
     output = A.T().Clone();
-    void* A_data = output.GetDataPtr()->CpuAddress();
+    void* A_data = output.GetDataView().CpuAddress();
 
     // Returns LU decomposition in form of an output matrix,
     // with lower triangular elements as L, upper triangular and diagonal
@@ -109,7 +109,7 @@ void LUIpiv(const Tensor& A, Tensor& ipiv, Tensor& output) {
 
         int64_t ipiv_len = std::min(rows, cols);
         ipiv = core::Tensor::Empty({ipiv_len}, ipiv_dtype, device);
-        void* ipiv_data = ipiv.GetDataPtr()->CpuAddress();
+        void* ipiv_data = ipiv.GetDataView().CpuAddress();
         LUCPU(A_data, ipiv_data, rows, cols, dtype, device);
     }
     // COL_MAJOR -> ROW_MAJOR.

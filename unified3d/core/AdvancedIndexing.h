@@ -169,27 +169,25 @@ public:
         element_byte_size_ = src.GetDtype().ByteSize();
     }
 
-    [[nodiscard]] inline std::shared_ptr<metal::Buffer> GetInputPtr(
+    [[nodiscard]] inline metal::Buffer GetInputView(
             int64_t workload_idx) const {
-        auto ptr = indexer_.GetInputPtr(0, workload_idx);
-        return std::make_shared<metal::Buffer>(
-                ptr->view(GetIndexedOffset(workload_idx) * element_byte_size_ *
-                          (mode_ == AdvancedIndexerMode::GET)));
+        auto view = indexer_.GetInputView(0, workload_idx);
+        return view.view(GetIndexedOffset(workload_idx) * element_byte_size_ *
+                         (mode_ == AdvancedIndexerMode::GET));
     }
 
-    [[nodiscard]] inline std::shared_ptr<metal::Buffer> GetOutputPtr(
+    [[nodiscard]] inline metal::Buffer GetOutputView(
             int64_t workload_idx) const {
-        auto ptr = indexer_.GetOutputPtr(workload_idx);
-        return std::make_shared<metal::Buffer>(
-                ptr->view(GetIndexedOffset(workload_idx) * element_byte_size_ *
-                          (mode_ == AdvancedIndexerMode::SET)));
+        auto view = indexer_.GetOutputView(workload_idx);
+        return view.view(GetIndexedOffset(workload_idx) * element_byte_size_ *
+                         (mode_ == AdvancedIndexerMode::SET));
     }
 
     [[nodiscard]] inline int64_t GetIndexedOffset(int64_t workload_idx) const {
         int64_t offset = 0;
         for (int64_t i = 0; i < num_indices_; ++i) {
             int64_t index = *(reinterpret_cast<int64_t*>(
-                    indexer_.GetInputPtr(i + 1, workload_idx)->CpuAddress()));
+                    indexer_.GetInputView(i + 1, workload_idx).CpuAddress()));
             UNIFIED3D_ASSERT(index >= -indexed_shape_[i] &&
                              index < indexed_shape_[i] &&
                              "Index out of bounds.");

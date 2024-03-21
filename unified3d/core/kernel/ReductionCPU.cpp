@@ -90,9 +90,9 @@ private:
         for (int64_t workload_idx = 0; workload_idx < indexer.NumWorkloads();
              ++workload_idx) {
             scalar_t* src = reinterpret_cast<scalar_t*>(
-                    indexer.GetInputPtr(0, workload_idx)->CpuAddress());
+                    indexer.GetInputView(0, workload_idx).CpuAddress());
             scalar_t* dst = reinterpret_cast<scalar_t*>(
-                    indexer.GetOutputPtr(workload_idx)->CpuAddress());
+                    indexer.GetOutputView(workload_idx).CpuAddress());
             *dst = element_kernel(*src, *dst);
         }
     }
@@ -120,13 +120,13 @@ private:
             for (int64_t workload_idx = start; workload_idx < end;
                  ++workload_idx) {
                 scalar_t* src = reinterpret_cast<scalar_t*>(
-                        indexer.GetInputPtr(0, workload_idx)->CpuAddress());
+                        indexer.GetInputView(0, workload_idx).CpuAddress());
                 thread_results[thread_idx] =
                         element_kernel(*src, thread_results[thread_idx]);
             }
         }
         scalar_t* dst = reinterpret_cast<scalar_t*>(
-                indexer.GetOutputPtr(0)->CpuAddress());
+                indexer.GetOutputView(0).CpuAddress());
         for (int64_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
             *dst = element_kernel(thread_results[thread_idx], *dst);
         }
@@ -195,10 +195,10 @@ public:
                  workload_idx < sub_indexer.NumWorkloads(); workload_idx++) {
                 int64_t src_idx = workload_idx;
                 scalar_t* src_val = reinterpret_cast<scalar_t*>(
-                        sub_indexer.GetInputPtr(0, workload_idx)->CpuAddress());
+                        sub_indexer.GetInputView(0, workload_idx).CpuAddress());
                 int64_t* dst_idx = reinterpret_cast<int64_t*>(
-                        sub_indexer.GetOutputPtr(0, workload_idx)
-                                ->CpuAddress());
+                        sub_indexer.GetOutputView(0, workload_idx)
+                                .CpuAddress());
                 std::tie(*dst_idx, dst_val) =
                         reduce_func(src_idx, *src_val, *dst_idx, dst_val);
             }

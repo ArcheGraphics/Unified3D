@@ -22,7 +22,7 @@ double Det(const Tensor& A) {
             core::Tensor A_3x3 =
                     A.To(core::Device("CPU:0"), false).Contiguous();
             const scalar_t* A_3x3_ptr =
-                    (scalar_t*)A_3x3.GetDataPtr()->CpuAddress();
+                    (scalar_t*)A_3x3.GetDataView().CpuAddress();
             det = static_cast<double>(linalg::kernel::det3x3(A_3x3_ptr));
         });
     } else if (A.GetShape() == u3d::core::SizeVector({2, 2})) {
@@ -30,7 +30,7 @@ double Det(const Tensor& A) {
             core::Tensor A_2x2 =
                     A.To(core::Device("CPU:0"), false).Contiguous();
             const scalar_t* A_2x2_ptr =
-                    (scalar_t*)A_2x2.GetDataPtr()->CpuAddress();
+                    (scalar_t*)A_2x2.GetDataView().CpuAddress();
             det = static_cast<double>(linalg::kernel::det2x2(A_2x2_ptr));
         });
     } else {
@@ -43,9 +43,9 @@ double Det(const Tensor& A) {
         int n = A.GetShape()[0];
 
         DISPATCH_FLOAT_DTYPE_TO_TEMPLATE(dtype, [&]() {
-            auto* output_ptr = (scalar_t*)output_cpu.GetDataPtr()->CpuAddress();
+            auto* output_ptr = (scalar_t*)output_cpu.GetDataView().CpuAddress();
             int* ipiv_ptr =
-                    static_cast<int*>(ipiv_cpu.GetDataPtr()->CpuAddress());
+                    static_cast<int*>(ipiv_cpu.GetDataView().CpuAddress());
 
             for (int i = 0; i < n; i++) {
                 det *= output_ptr[i * n + i];
