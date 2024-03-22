@@ -24,13 +24,13 @@ void LaunchUnaryEWKernel(device u3d::metal::Indexer& indexer,
                    indexer.GetOutputPtr<dst_t>(index));
 }
 
-[[kernel]] void CopyObjectElementKernel(device u3d::metal::Indexer& indexer,
-                                        constant int32_t& object_byte_size,
+[[kernel]] void CopyObjectElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
+                                        constant int64_t& object_byte_size [[buffer(1)]],
                                         uint index  [[thread_position_in_grid]]) {
     struct Functor {
-        int32_t object_byte_size;
+        int64_t object_byte_size;
         
-        Functor(int32_t object_byte_size): object_byte_size(object_byte_size) {}
+        Functor(int64_t object_byte_size): object_byte_size(object_byte_size) {}
         
         void operator()(const device char* src_bytes,
                         device char* dst_bytes) {
@@ -44,8 +44,8 @@ void LaunchUnaryEWKernel(device u3d::metal::Indexer& indexer,
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void CopySingleKernel(device scalar_t* dst_ptr,
-                                 constant scalar_t& scalar_element,
+[[kernel]] void CopySingleKernel(device scalar_t* dst_ptr [[buffer(0)]],
+                                 constant scalar_t& scalar_element [[buffer(1)]],
                                  uint index [[thread_position_in_grid]]) {
     dst_ptr[index] = scalar_element;
 }
@@ -57,20 +57,20 @@ device type* dst_ptr, \
 constant type& scalar_element, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_CopySingleKernel(uint8, uint8_t)
-instantiate_CopySingleKernel(uint16, uint16_t)
-instantiate_CopySingleKernel(uint32, uint32_t)
-instantiate_CopySingleKernel(uint64, uint64_t)
-instantiate_CopySingleKernel(int8, int8_t)
-instantiate_CopySingleKernel(int16, int16_t)
-instantiate_CopySingleKernel(int32, int32_t)
-instantiate_CopySingleKernel(int64, int64_t)
-instantiate_CopySingleKernel(float16, half)
-instantiate_CopySingleKernel(float32, float)
+instantiate_CopySingleKernel(UInt8, uint8_t)
+instantiate_CopySingleKernel(UInt16, uint16_t)
+instantiate_CopySingleKernel(UInt32, uint32_t)
+instantiate_CopySingleKernel(UInt64, uint64_t)
+instantiate_CopySingleKernel(Int8, int8_t)
+instantiate_CopySingleKernel(Int16, int16_t)
+instantiate_CopySingleKernel(Int32, int32_t)
+instantiate_CopySingleKernel(Int64, int64_t)
+instantiate_CopySingleKernel(Float32, float)
+instantiate_CopySingleKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename src_t, typename dst_t>
-[[kernel]] void CopyElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void CopyElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                   uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -88,20 +88,20 @@ template [[host_name("CopyElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_CopyElementKernel(uint8, uint8_t)
-instantiate_CopyElementKernel(uint16, uint16_t)
-instantiate_CopyElementKernel(uint32, uint32_t)
-instantiate_CopyElementKernel(uint64, uint64_t)
-instantiate_CopyElementKernel(int8, int8_t)
-instantiate_CopyElementKernel(int16, int16_t)
-instantiate_CopyElementKernel(int32, int32_t)
-instantiate_CopyElementKernel(int64, int64_t)
-instantiate_CopyElementKernel(float16, half)
-instantiate_CopyElementKernel(float32, float)
+instantiate_CopyElementKernel(UInt8, uint8_t)
+instantiate_CopyElementKernel(UInt16, uint16_t)
+instantiate_CopyElementKernel(UInt32, uint32_t)
+instantiate_CopyElementKernel(UInt64, uint64_t)
+instantiate_CopyElementKernel(Int8, int8_t)
+instantiate_CopyElementKernel(Int16, int16_t)
+instantiate_CopyElementKernel(Int32, int32_t)
+instantiate_CopyElementKernel(Int64, int64_t)
+instantiate_CopyElementKernel(Float32, float)
+instantiate_CopyElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void SqrtElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void SqrtElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                   uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -118,20 +118,20 @@ template [[host_name("SqrtElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_SqrtElementKernel(uint8, uint8_t)
-instantiate_SqrtElementKernel(uint16, uint16_t)
-instantiate_SqrtElementKernel(uint32, uint32_t)
-instantiate_SqrtElementKernel(uint64, uint64_t)
-instantiate_SqrtElementKernel(int8, int8_t)
-instantiate_SqrtElementKernel(int16, int16_t)
-instantiate_SqrtElementKernel(int32, int32_t)
-instantiate_SqrtElementKernel(int64, int64_t)
-instantiate_SqrtElementKernel(float16, half)
-instantiate_SqrtElementKernel(float32, float)
+instantiate_SqrtElementKernel(UInt8, uint8_t)
+instantiate_SqrtElementKernel(UInt16, uint16_t)
+instantiate_SqrtElementKernel(UInt32, uint32_t)
+instantiate_SqrtElementKernel(UInt64, uint64_t)
+instantiate_SqrtElementKernel(Int8, int8_t)
+instantiate_SqrtElementKernel(Int16, int16_t)
+instantiate_SqrtElementKernel(Int32, int32_t)
+instantiate_SqrtElementKernel(Int64, int64_t)
+instantiate_SqrtElementKernel(Float32, float)
+instantiate_SqrtElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void SinElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void SinElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                  uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -148,20 +148,20 @@ template [[host_name("SinElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_SinElementKernel(uint8, uint8_t)
-instantiate_SinElementKernel(uint16, uint16_t)
-instantiate_SinElementKernel(uint32, uint32_t)
-instantiate_SinElementKernel(uint64, uint64_t)
-instantiate_SinElementKernel(int8, int8_t)
-instantiate_SinElementKernel(int16, int16_t)
-instantiate_SinElementKernel(int32, int32_t)
-instantiate_SinElementKernel(int64, int64_t)
-instantiate_SinElementKernel(float16, half)
-instantiate_SinElementKernel(float32, float)
+instantiate_SinElementKernel(UInt8, uint8_t)
+instantiate_SinElementKernel(UInt16, uint16_t)
+instantiate_SinElementKernel(UInt32, uint32_t)
+instantiate_SinElementKernel(UInt64, uint64_t)
+instantiate_SinElementKernel(Int8, int8_t)
+instantiate_SinElementKernel(Int16, int16_t)
+instantiate_SinElementKernel(Int32, int32_t)
+instantiate_SinElementKernel(Int64, int64_t)
+instantiate_SinElementKernel(Float32, float)
+instantiate_SinElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void CosElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void CosElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                  uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -178,20 +178,21 @@ template [[host_name("CosElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_CosElementKernel(uint8, uint8_t)
-instantiate_CosElementKernel(uint16, uint16_t)
-instantiate_CosElementKernel(uint32, uint32_t)
-instantiate_CosElementKernel(uint64, uint64_t)
-instantiate_CosElementKernel(int8, int8_t)
-instantiate_CosElementKernel(int16, int16_t)
-instantiate_CosElementKernel(int32, int32_t)
-instantiate_CosElementKernel(int64, int64_t)
-instantiate_CosElementKernel(float16, half)
-instantiate_CosElementKernel(float32, float)
+
+instantiate_CosElementKernel(UInt8, uint8_t)
+instantiate_CosElementKernel(UInt16, uint16_t)
+instantiate_CosElementKernel(UInt32, uint32_t)
+instantiate_CosElementKernel(UInt64, uint64_t)
+instantiate_CosElementKernel(Int8, int8_t)
+instantiate_CosElementKernel(Int16, int16_t)
+instantiate_CosElementKernel(Int32, int32_t)
+instantiate_CosElementKernel(Int64, int64_t)
+instantiate_CosElementKernel(Float32, float)
+instantiate_CosElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void NegElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void NegElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                  uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -208,20 +209,20 @@ template [[host_name("NegElementKernel" #tname )]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_NegElementKernel(uint8, uint8_t)
-instantiate_NegElementKernel(uint16, uint16_t)
-instantiate_NegElementKernel(uint32, uint32_t)
-instantiate_NegElementKernel(uint64, uint64_t)
-instantiate_NegElementKernel(int8, int8_t)
-instantiate_NegElementKernel(int16, int16_t)
-instantiate_NegElementKernel(int32, int32_t)
-instantiate_NegElementKernel(int64, int64_t)
-instantiate_NegElementKernel(float16, half)
-instantiate_NegElementKernel(float32, float)
+instantiate_NegElementKernel(UInt8, uint8_t)
+instantiate_NegElementKernel(UInt16, uint16_t)
+instantiate_NegElementKernel(UInt32, uint32_t)
+instantiate_NegElementKernel(UInt64, uint64_t)
+instantiate_NegElementKernel(Int8, int8_t)
+instantiate_NegElementKernel(Int16, int16_t)
+instantiate_NegElementKernel(Int32, int32_t)
+instantiate_NegElementKernel(Int64, int64_t)
+instantiate_NegElementKernel(Float32, float)
+instantiate_NegElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void ExpElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void ExpElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                  uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -238,19 +239,20 @@ template [[host_name("ExpElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_ExpElementKernel(uint8, uint8_t)
-instantiate_ExpElementKernel(uint16, uint16_t)
-instantiate_ExpElementKernel(uint32, uint32_t)
-instantiate_ExpElementKernel(uint64, uint64_t)
-instantiate_ExpElementKernel(int8, int8_t)
-instantiate_ExpElementKernel(int16, int16_t)
-instantiate_ExpElementKernel(int32, int32_t)
-instantiate_ExpElementKernel(int64, int64_t)
-instantiate_ExpElementKernel(float16, half)
-instantiate_ExpElementKernel(float32, float)
+instantiate_ExpElementKernel(UInt8, uint8_t)
+instantiate_ExpElementKernel(UInt16, uint16_t)
+instantiate_ExpElementKernel(UInt32, uint32_t)
+instantiate_ExpElementKernel(UInt64, uint64_t)
+instantiate_ExpElementKernel(Int8, int8_t)
+instantiate_ExpElementKernel(Int16, int16_t)
+instantiate_ExpElementKernel(Int32, int32_t)
+instantiate_ExpElementKernel(Int64, int64_t)
+instantiate_ExpElementKernel(Float32, float)
+instantiate_ExpElementKernel(Bool, bool)
+
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void AbsElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void AbsElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                  uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -267,20 +269,20 @@ template [[host_name("AbsElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_AbsElementKernel(uint8, uint8_t)
-instantiate_AbsElementKernel(uint16, uint16_t)
-instantiate_AbsElementKernel(uint32, uint32_t)
-instantiate_AbsElementKernel(uint64, uint64_t)
-instantiate_AbsElementKernel(int8, int8_t)
-instantiate_AbsElementKernel(int16, int16_t)
-instantiate_AbsElementKernel(int32, int32_t)
-instantiate_AbsElementKernel(int64, int64_t)
-instantiate_AbsElementKernel(float16, half)
-instantiate_AbsElementKernel(float32, float)
+instantiate_AbsElementKernel(UInt8, uint8_t)
+instantiate_AbsElementKernel(UInt16, uint16_t)
+instantiate_AbsElementKernel(UInt32, uint32_t)
+instantiate_AbsElementKernel(UInt64, uint64_t)
+instantiate_AbsElementKernel(Int8, int8_t)
+instantiate_AbsElementKernel(Int16, int16_t)
+instantiate_AbsElementKernel(Int32, int32_t)
+instantiate_AbsElementKernel(Int64, int64_t)
+instantiate_AbsElementKernel(Float32, float)
+instantiate_AbsElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void IsNanElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void IsNanElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                    uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -297,19 +299,19 @@ template [[host_name("IsNanElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_IsNanElementKernel(uint8, uint8_t)
-instantiate_IsNanElementKernel(uint16, uint16_t)
-instantiate_IsNanElementKernel(uint32, uint32_t)
-instantiate_IsNanElementKernel(uint64, uint64_t)
-instantiate_IsNanElementKernel(int8, int8_t)
-instantiate_IsNanElementKernel(int16, int16_t)
-instantiate_IsNanElementKernel(int32, int32_t)
-instantiate_IsNanElementKernel(int64, int64_t)
-instantiate_IsNanElementKernel(float16, half)
-instantiate_IsNanElementKernel(float32, float)
+instantiate_IsNanElementKernel(UInt8, uint8_t)
+instantiate_IsNanElementKernel(UInt16, uint16_t)
+instantiate_IsNanElementKernel(UInt32, uint32_t)
+instantiate_IsNanElementKernel(UInt64, uint64_t)
+instantiate_IsNanElementKernel(Int8, int8_t)
+instantiate_IsNanElementKernel(Int16, int16_t)
+instantiate_IsNanElementKernel(Int32, int32_t)
+instantiate_IsNanElementKernel(Int64, int64_t)
+instantiate_IsNanElementKernel(Float32, float)
+instantiate_IsNanElementKernel(Bool, bool)
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void IsInfElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void IsInfElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                    uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -326,19 +328,20 @@ template [[host_name("IsInfElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_IsInfElementKernel(uint8, uint8_t)
-instantiate_IsInfElementKernel(uint16, uint16_t)
-instantiate_IsInfElementKernel(uint32, uint32_t)
-instantiate_IsInfElementKernel(uint64, uint64_t)
-instantiate_IsInfElementKernel(int8, int8_t)
-instantiate_IsInfElementKernel(int16, int16_t)
-instantiate_IsInfElementKernel(int32, int32_t)
-instantiate_IsInfElementKernel(int64, int64_t)
-instantiate_IsInfElementKernel(float16, half)
-instantiate_IsInfElementKernel(float32, float)
+instantiate_IsInfElementKernel(UInt8, uint8_t)
+instantiate_IsInfElementKernel(UInt16, uint16_t)
+instantiate_IsInfElementKernel(UInt32, uint32_t)
+instantiate_IsInfElementKernel(UInt64, uint64_t)
+instantiate_IsInfElementKernel(Int8, int8_t)
+instantiate_IsInfElementKernel(Int16, int16_t)
+instantiate_IsInfElementKernel(Int32, int32_t)
+instantiate_IsInfElementKernel(Int64, int64_t)
+instantiate_IsInfElementKernel(Float32, float)
+instantiate_IsInfElementKernel(Bool, bool)
+
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void IsFiniteElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void IsFiniteElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                       uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -355,20 +358,20 @@ template [[host_name("IsFiniteElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_IsFiniteElementKernel(uint8, uint8_t)
-instantiate_IsFiniteElementKernel(uint16, uint16_t)
-instantiate_IsFiniteElementKernel(uint32, uint32_t)
-instantiate_IsFiniteElementKernel(uint64, uint64_t)
-instantiate_IsFiniteElementKernel(int8, int8_t)
-instantiate_IsFiniteElementKernel(int16, int16_t)
-instantiate_IsFiniteElementKernel(int32, int32_t)
-instantiate_IsFiniteElementKernel(int64, int64_t)
-instantiate_IsFiniteElementKernel(float16, half)
-instantiate_IsFiniteElementKernel(float32, float)
+instantiate_IsFiniteElementKernel(UInt8, uint8_t)
+instantiate_IsFiniteElementKernel(UInt16, uint16_t)
+instantiate_IsFiniteElementKernel(UInt32, uint32_t)
+instantiate_IsFiniteElementKernel(UInt64, uint64_t)
+instantiate_IsFiniteElementKernel(Int8, int8_t)
+instantiate_IsFiniteElementKernel(Int16, int16_t)
+instantiate_IsFiniteElementKernel(Int32, int32_t)
+instantiate_IsFiniteElementKernel(Int64, int64_t)
+instantiate_IsFiniteElementKernel(Float32, float)
+instantiate_IsFiniteElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void FloorElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void FloorElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                    uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -385,20 +388,20 @@ template [[host_name("FloorElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_FloorElementKernel(uint8, uint8_t)
-instantiate_FloorElementKernel(uint16, uint16_t)
-instantiate_FloorElementKernel(uint32, uint32_t)
-instantiate_FloorElementKernel(uint64, uint64_t)
-instantiate_FloorElementKernel(int8, int8_t)
-instantiate_FloorElementKernel(int16, int16_t)
-instantiate_FloorElementKernel(int32, int32_t)
-instantiate_FloorElementKernel(int64, int64_t)
-instantiate_FloorElementKernel(float16, half)
-instantiate_FloorElementKernel(float32, float)
+instantiate_FloorElementKernel(UInt8, uint8_t)
+instantiate_FloorElementKernel(UInt16, uint16_t)
+instantiate_FloorElementKernel(UInt32, uint32_t)
+instantiate_FloorElementKernel(UInt64, uint64_t)
+instantiate_FloorElementKernel(Int8, int8_t)
+instantiate_FloorElementKernel(Int16, int16_t)
+instantiate_FloorElementKernel(Int32, int32_t)
+instantiate_FloorElementKernel(Int64, int64_t)
+instantiate_FloorElementKernel(Float32, float)
+instantiate_FloorElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void CeilElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void CeilElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                   uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -415,20 +418,20 @@ template [[host_name("CeilElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_CeilElementKernel(uint8, uint8_t)
-instantiate_CeilElementKernel(uint16, uint16_t)
-instantiate_CeilElementKernel(uint32, uint32_t)
-instantiate_CeilElementKernel(uint64, uint64_t)
-instantiate_CeilElementKernel(int8, int8_t)
-instantiate_CeilElementKernel(int16, int16_t)
-instantiate_CeilElementKernel(int32, int32_t)
-instantiate_CeilElementKernel(int64, int64_t)
-instantiate_CeilElementKernel(float16, half)
-instantiate_CeilElementKernel(float32, float)
+instantiate_CeilElementKernel(UInt8, uint8_t)
+instantiate_CeilElementKernel(UInt16, uint16_t)
+instantiate_CeilElementKernel(UInt32, uint32_t)
+instantiate_CeilElementKernel(UInt64, uint64_t)
+instantiate_CeilElementKernel(Int8, int8_t)
+instantiate_CeilElementKernel(Int16, int16_t)
+instantiate_CeilElementKernel(Int32, int32_t)
+instantiate_CeilElementKernel(Int64, int64_t)
+instantiate_CeilElementKernel(Float32, float)
+instantiate_CeilElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void RoundElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void RoundElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                    uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -445,20 +448,20 @@ template [[host_name("RoundElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_RoundElementKernel(uint8, uint8_t)
-instantiate_RoundElementKernel(uint16, uint16_t)
-instantiate_RoundElementKernel(uint32, uint32_t)
-instantiate_RoundElementKernel(uint64, uint64_t)
-instantiate_RoundElementKernel(int8, int8_t)
-instantiate_RoundElementKernel(int16, int16_t)
-instantiate_RoundElementKernel(int32, int32_t)
-instantiate_RoundElementKernel(int64, int64_t)
-instantiate_RoundElementKernel(float16, half)
-instantiate_RoundElementKernel(float32, float)
+instantiate_RoundElementKernel(UInt8, uint8_t)
+instantiate_RoundElementKernel(UInt16, uint16_t)
+instantiate_RoundElementKernel(UInt32, uint32_t)
+instantiate_RoundElementKernel(UInt64, uint64_t)
+instantiate_RoundElementKernel(Int8, int8_t)
+instantiate_RoundElementKernel(Int16, int16_t)
+instantiate_RoundElementKernel(Int32, int32_t)
+instantiate_RoundElementKernel(Int64, int64_t)
+instantiate_RoundElementKernel(Float32, float)
+instantiate_RoundElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename scalar_t>
-[[kernel]] void TruncElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void TruncElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                    uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -475,20 +478,20 @@ template [[host_name("TruncElementKernel" #tname)]] \
 device u3d::metal::Indexer& indexer, \
 uint index [[thread_position_in_grid]]);
 
-instantiate_TruncElementKernel(uint8, uint8_t)
-instantiate_TruncElementKernel(uint16, uint16_t)
-instantiate_TruncElementKernel(uint32, uint32_t)
-instantiate_TruncElementKernel(uint64, uint64_t)
-instantiate_TruncElementKernel(int8, int8_t)
-instantiate_TruncElementKernel(int16, int16_t)
-instantiate_TruncElementKernel(int32, int32_t)
-instantiate_TruncElementKernel(int64, int64_t)
-instantiate_TruncElementKernel(float16, half)
-instantiate_TruncElementKernel(float32, float)
+instantiate_TruncElementKernel(UInt8, uint8_t)
+instantiate_TruncElementKernel(UInt16, uint16_t)
+instantiate_TruncElementKernel(UInt32, uint32_t)
+instantiate_TruncElementKernel(UInt64, uint64_t)
+instantiate_TruncElementKernel(Int8, int8_t)
+instantiate_TruncElementKernel(Int16, int16_t)
+instantiate_TruncElementKernel(Int32, int32_t)
+instantiate_TruncElementKernel(Int64, int64_t)
+instantiate_TruncElementKernel(Float32, float)
+instantiate_TruncElementKernel(Bool, bool)
 
 //--------------------------------------------------------------------------------------------
 template <typename src_t, typename dst_t>
-[[kernel]] void LogicalNotElementKernel(device u3d::metal::Indexer& indexer,
+[[kernel]] void LogicalNotElementKernel(device u3d::metal::Indexer& indexer [[buffer(0)]],
                                         uint index [[thread_position_in_grid]]) {
     struct Functor {
         void operator()(const device void* src,
@@ -503,15 +506,15 @@ template <typename src_t, typename dst_t>
 template [[host_name("LogicalNotElementKernel" #tname)]] \
 [[kernel]] void LogicalNotElementKernel<type, type>(\
 device u3d::metal::Indexer& indexer, \
-uint index [[thread_position_in_grid]]); \
+uint index [[thread_position_in_grid]]);
 
-instantiate_LogicalNotElementKernel(uint8, uint8_t)
-instantiate_LogicalNotElementKernel(uint16, uint16_t)
-instantiate_LogicalNotElementKernel(uint32, uint32_t)
-instantiate_LogicalNotElementKernel(uint64, uint64_t)
-instantiate_LogicalNotElementKernel(int8, int8_t)
-instantiate_LogicalNotElementKernel(int16, int16_t)
-instantiate_LogicalNotElementKernel(int32, int32_t)
-instantiate_LogicalNotElementKernel(int64, int64_t)
-instantiate_LogicalNotElementKernel(float16, half)
-instantiate_LogicalNotElementKernel(float32, float)
+instantiate_LogicalNotElementKernel(UInt8, uint8_t)
+instantiate_LogicalNotElementKernel(UInt16, uint16_t)
+instantiate_LogicalNotElementKernel(UInt32, uint32_t)
+instantiate_LogicalNotElementKernel(UInt64, uint64_t)
+instantiate_LogicalNotElementKernel(Int8, int8_t)
+instantiate_LogicalNotElementKernel(Int16, int16_t)
+instantiate_LogicalNotElementKernel(Int32, int32_t)
+instantiate_LogicalNotElementKernel(Int64, int64_t)
+instantiate_LogicalNotElementKernel(Float32, float)
+instantiate_LogicalNotElementKernel(Bool, bool)

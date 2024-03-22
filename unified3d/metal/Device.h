@@ -120,9 +120,6 @@ public:
             const MTLFCList &func_consts = {},
             const std::vector<MTL::Function *> &linked_functions = {});
 
-    [[nodiscard]] MTL::ArgumentEncoder *argument_encoder(
-            const std::vector<MTL::ArgumentDescriptor *> &arg_descs) const;
-
 private:
     MTL::Library *get_library_cache_(const std::string &name);
 

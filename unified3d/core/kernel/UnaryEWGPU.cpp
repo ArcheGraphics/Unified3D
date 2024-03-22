@@ -40,7 +40,7 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
                 auto dst_ptr = dst.GetDataView().GpuAddress();
                 {
                     auto compute_encoder = d.get_command_encoder(0);
-                    auto kernel = d.get_kernel("CopySingleKernel");
+                    auto kernel = d.get_kernel(fmt::format("CopySingleKernel{}", dst_dtype.ToString()));
                     compute_encoder->setComputePipelineState(kernel);
                     compute_encoder->setBytes(&dst_ptr, sizeof(uint64_t), 0);
                     compute_encoder->setBytes(&scalar_element, sizeof(scalar_t),
@@ -60,7 +60,7 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
             if (src.GetDtype().IsObject()) {
                 int64_t object_byte_size = src.GetDtype().ByteSize();
                 {
-                    auto kernel = d.get_kernel("MetalCopyObjectElementKernel");
+                    auto kernel = d.get_kernel("CopyObjectElementKernel");
                     compute_encoder->setComputePipelineState(kernel);
                     compute_encoder->setBytes(&indexer,
                                               sizeof(u3d::metal::Indexer), 0);
@@ -77,7 +77,7 @@ void CopyGPU(const Tensor& src, Tensor& dst) {
                     DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(dst_dtype, [&]() {
                         using dst_t = scalar_t;
                         {
-                            auto kernel = d.get_kernel("CopyElementKernel");
+                            auto kernel = d.get_kernel(fmt::format("CopyElementKernel{}", dst_dtype.ToString()));
                             compute_encoder->setComputePipelineState(kernel);
                             compute_encoder->setBytes(
                                     &indexer, sizeof(u3d::metal::Indexer), 0);
@@ -134,11 +134,11 @@ void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
         DISPATCH_DTYPE_TO_TEMPLATE_WITH_BOOL(src_dtype, [&]() {
             if (dst_dtype == src_dtype) {
                 Indexer indexer({src}, dst, DtypePolicy::ALL_SAME);
-                DispatchUnaryEW("LogicalNotElementKernel", indexer);
+                DispatchUnaryEW(fmt::format("LogicalNotElementKernel{}", src_dtype.ToString()), indexer);
             } else if (dst_dtype == core::Bool) {
                 Indexer indexer({src}, dst,
                                 DtypePolicy::INPUT_SAME_OUTPUT_BOOL);
-                DispatchUnaryEW("LogicalNotElementKernel", indexer);
+                DispatchUnaryEW(fmt::format("LogicalNotElementKernel{}", src_dtype.ToString()), indexer);
             } else {
                 utility::LogError(
                         "Boolean op's output type must be boolean or the "
@@ -152,11 +152,11 @@ void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
         Indexer indexer({src}, dst, DtypePolicy::INPUT_SAME_OUTPUT_BOOL);
         DISPATCH_DTYPE_TO_TEMPLATE(src_dtype, [&]() {
             if (op_code == UnaryEWOpCode::IsNan) {
-                DispatchUnaryEW("IsNanElementKernel", indexer);
+                DispatchUnaryEW(fmt::format("IsNanElementKernel{}", src_dtype.ToString()), indexer);
             } else if (op_code == UnaryEWOpCode::IsInf) {
-                DispatchUnaryEW("IsInfElementKernel", indexer);
+                DispatchUnaryEW(fmt::format("IsInfElementKernel{}", src_dtype.ToString()), indexer);
             } else if (op_code == UnaryEWOpCode::IsFinite) {
-                DispatchUnaryEW("IsFiniteElementKernel", indexer);
+                DispatchUnaryEW(fmt::format("IsFiniteElementKernel{}", src_dtype.ToString()), indexer);
             }
         });
     } else {
@@ -165,37 +165,37 @@ void UnaryEWGPU(const Tensor& src, Tensor& dst, UnaryEWOpCode op_code) {
             switch (op_code) {
                 case UnaryEWOpCode::Sqrt:
                     assert_dtype_is_float(src_dtype);
-                    DispatchUnaryEW("SqrtElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("SqrtElementKernel{}", src_dtype.ToString()), indexer);
                     break;
                 case UnaryEWOpCode::Sin:
                     assert_dtype_is_float(src_dtype);
-                    DispatchUnaryEW("SinElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("SinElementKernel{}", src_dtype.ToString()), indexer);
                     break;
                 case UnaryEWOpCode::Cos:
                     assert_dtype_is_float(src_dtype);
-                    DispatchUnaryEW("CosElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("CosElementKernel{}", src_dtype.ToString()), indexer);
                     break;
                 case UnaryEWOpCode::Neg:
-                    DispatchUnaryEW("NegElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("NegElementKernel{}", src_dtype.ToString()), indexer);
                     break;
                 case UnaryEWOpCode::Exp:
                     assert_dtype_is_float(src_dtype);
-                    DispatchUnaryEW("ExpElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("ExpElementKernel{}", src_dtype.ToString()), indexer);
                     break;
                 case UnaryEWOpCode::Abs: {
-                    DispatchUnaryEW("AbsElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("AbsElementKernel{}", src_dtype.ToString()), indexer);
                 } break;
                 case UnaryEWOpCode::Floor: {
-                    DispatchUnaryEW("FloorElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("FloorElementKernel{}", src_dtype.ToString()), indexer);
                 } break;
                 case UnaryEWOpCode::Ceil: {
-                    DispatchUnaryEW("CeilElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("CeilElementKernel{}", src_dtype.ToString()), indexer);
                 } break;
                 case UnaryEWOpCode::Round: {
-                    DispatchUnaryEW("RoundElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("RoundElementKernel{}", src_dtype.ToString()), indexer);
                 } break;
                 case UnaryEWOpCode::Trunc: {
-                    DispatchUnaryEW("TruncElementKernel", indexer);
+                    DispatchUnaryEW(fmt::format("TruncElementKernel{}", src_dtype.ToString()), indexer);
                 } break;
                 default:
                     utility::LogError("Unimplemented op_code for UnaryEWMetal");
