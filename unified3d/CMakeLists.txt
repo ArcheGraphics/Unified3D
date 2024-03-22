@@ -302,31 +302,30 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         "-framework QuartzCore"
 )
 
-#set(KERNEL_FIELS
-#        ${CMAKE_CURRENT_SOURCE_DIR}/../shader/builtin/mad_throughput.metal
-#        ${CMAKE_CURRENT_SOURCE_DIR}/../shader/builtin/reduce.metal
-#)
-#
-#build_metallib(
-#        TARGET metal_kernel_metallib
-#        TITLE metal_kernel
-#        SOURCES ${KERNEL_FIELS}
-#        INCLUDE_DIRS ${PROJECT_SOURCE_DIR} ${MLX_INCLUDE_DIRS}
-#        OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#)
-#
-#add_dependencies(
-#        ${PROJECT_NAME}
-#        metal_kernel_metallib
-#)
-#
+set(KERNEL_FIELS
+        ${CMAKE_CURRENT_SOURCE_DIR}/metal/kernels/UnaryEW.metal
+)
+
+build_metallib(
+        TARGET metal_kernel_metallib
+        TITLE metal_kernel
+        SOURCES ${KERNEL_FIELS}
+        INCLUDE_DIRS ${PROJECT_SOURCE_DIR} ${MLX_INCLUDE_DIRS}
+        OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_dependencies(
+        ${PROJECT_NAME}
+        metal_kernel_metallib
+)
+
 set(MLX_METAL_PATH ${CMAKE_CURRENT_BINARY_DIR}/)
-#target_compile_definitions(
-#        ${PROJECT_NAME} PRIVATE METAL_PATH="${MLX_METAL_PATH}/metal_kernel.metallib")
-#
-## python install
-#install(
-#        FILES ${MLX_METAL_PATH}/metal_kernel.metallib
-#        DESTINATION arche_compute
-#        COMPONENT metallib
-#)
+target_compile_definitions(
+        ${PROJECT_NAME} PRIVATE METAL_PATH="${MLX_METAL_PATH}/metal_kernel.metallib")
+
+# python install
+install(
+        FILES ${MLX_METAL_PATH}/metal_kernel.metallib
+        DESTINATION arche_compute
+        COMPONENT metallib
+)

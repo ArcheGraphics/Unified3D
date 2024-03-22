@@ -26,7 +26,7 @@ namespace {
 // TODO nicer way to set this or possibly expose as an environment variable
 static constexpr int MAX_BUFFERS_PER_QUEUE = 12;
 
-static constexpr const char* default_mtllib_path = "MLX_METAL_PATH";
+static constexpr const char* default_mtllib_path = METAL_PATH;
 
 auto load_device() {
     auto devices = MTL::CopyAllDevices();
@@ -78,7 +78,7 @@ MTL::Library* load_library(MTL::Device* device,
 Device::Device() {
     auto pool = NewScopedMemoryPool();
     device_ = load_device();
-    // todo    library_map_ = {{"mlx", load_library(device_)}};
+    library_map_ = {{"mlx", load_library(device_)}};
 }
 
 Device::~Device() {
