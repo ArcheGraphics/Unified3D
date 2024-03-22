@@ -37,6 +37,8 @@ set(CORE_FILES
         core/Indexer.cpp
         core/AdvancedIndexing.h
         core/AdvancedIndexing.cpp
+        core/Scheduler.h
+        core/Scheduler.cpp
         # Kernel
         core/kernel/Kernel.h
         core/kernel/Kernel.cpp

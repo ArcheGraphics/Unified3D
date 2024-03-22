@@ -18,11 +18,14 @@ public:
     /// Type for device.
     enum class DeviceType { CPU = 0, GPU = 1 };
 
+    static constexpr DeviceType CPU = DeviceType::CPU;
+    static constexpr DeviceType GPU = DeviceType::GPU;
+
     /// Default constructor -> "CPU:0".
     Device() = default;
 
     /// Constructor with device specified.
-    explicit Device(DeviceType device_type, int device_id);
+    Device(DeviceType device_type, int device_id = 0);
 
     /// Constructor from device type string and device id.
     explicit Device(const std::string &device_type, int device_id);
@@ -71,7 +74,7 @@ public:
     static void PrintAvailableDevices();
 
 protected:
-    DeviceType device_type_ = DeviceType::CPU;
+    DeviceType device_type_ = DeviceType::GPU;
     int device_id_ = 0;
 };
 
